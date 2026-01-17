@@ -203,7 +203,8 @@
       ],
       "links": {
         "github": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/requesthunt",
-        "docs": "https://requesthunt.com/docs"
+        "docs": "https://requesthunt.com/docs",
+        "example": "https://github.com/ReScienceLab/opc-skills/blob/main/skills/requesthunt/examples/calendar-app-research.md"
       }
     }
   ]
