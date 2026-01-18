@@ -128,7 +128,8 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
     header { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--black); z-index: 100; }
     .header-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--black); }
-    .logo-icon { width: 28px; height: 28px; background: var(--black); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .logo-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon img { width: 32px; height: 32px; object-fit: contain; }
     .logo-text { font-size: 16px; font-weight: 700; }
     nav { display: flex; align-items: center; gap: 16px; }
     nav a { font-size: 12px; color: var(--gray-600); text-decoration: none; }
@@ -259,7 +260,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
   <header>
     <div class="header-inner">
       <a href="/" class="logo">
-        <div class="logo-icon">O</div>
+        <div class="logo-icon"><img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-logo.svg" alt="OPC"></div>
         <span class="logo-text">OPC Skills</span>
       </a>
       <nav>

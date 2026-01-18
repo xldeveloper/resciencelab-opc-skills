@@ -4,7 +4,7 @@
   "description": "Agent Skills for One Person Companies",
   "repository": "https://github.com/ReScienceLab/opc-skills",
   "website": "https://opc.dev",
-  "logo": "https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/resciencelab-logo.svg",
+  "logo": "https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-logo.svg",
   "skills": [
     {
       "name": "domain-hunter",
@@ -205,6 +205,46 @@
         "github": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/requesthunt",
         "docs": "https://requesthunt.com/docs",
         "example": "https://github.com/ReScienceLab/opc-skills/blob/main/skills/requesthunt/examples/calendar-app-research.md"
+      }
+    },
+    {
+      "name": "logo-creator",
+      "version": "1.0.0",
+      "description": "Create logos using AI image generation. Discuss style/ratio, generate variations, iterate with user feedback, crop, remove background, and export as SVG.",
+      "icon": "image",
+      "color": "8B5CF6",
+      "triggers": ["logo", "brand", "icon", "favicon", "mascot", "emblem", "create logo", "design logo"],
+      "dependencies": [],
+      "auth": {
+        "required": true,
+        "type": "api_key",
+        "env_var": "REMOVE_BG_API_KEY, RECRAFT_API_KEY",
+        "note": "Requires remove.bg API key and Recraft API key for background removal and SVG conversion"
+      },
+      "install": {
+        "user": {
+          "claude": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude logo-creator",
+          "droid": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t droid logo-creator",
+          "opencode": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t opencode logo-creator",
+          "codex": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t codex logo-creator"
+        },
+        "project": {
+          "claude": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude -p logo-creator",
+          "droid": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t droid -p logo-creator",
+          "cursor": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t cursor -p logo-creator",
+          "opencode": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t opencode -p logo-creator",
+          "codex": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t codex -p logo-creator"
+        }
+      },
+      "commands": [
+        "nano-banana-pro___generate_image(prompt, aspectRatio, fileName)",
+        "python3 scripts/crop_logo.py {input.png} {output.png}",
+        "python3 scripts/remove_bg.py {input.png} {output.png}",
+        "python3 scripts/vectorize.py {input.png} {output.svg}"
+      ],
+      "links": {
+        "github": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/logo-creator",
+        "example": "https://github.com/ReScienceLab/opc-skills/blob/main/skills/logo-creator/examples/opc-logo-creation.md"
       }
     }
   ]
