@@ -1,0 +1,73 @@
+name: Test Installer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'install.sh'
+      - 'skills.json'
+      - 'skills/**'
+  pull_request:
+    paths:
+      - 'install.sh'
+      - 'skills.json'
+      - 'skills/**'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        skill: [reddit, twitter, logo-creator, domain-hunter, all]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install jq (Windows)
+        if: runner.os == 'Windows'
+        run: choco install jq -y
+        
+      - name: Test install script (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x install.sh
+          # Test help
+          ./install.sh -h
+          # Test install to custom directory
+          ./install.sh -t custom -d ./test-skills ${{ matrix.skill }}
+          # Verify installation
+          ls -la ./test-skills/
+          
+      - name: Test install script (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          chmod +x install.sh
+          ./install.sh -h
+          ./install.sh -t custom -d ./test-skills ${{ matrix.skill }}
+          ls -la ./test-skills/
+
+  validate-skills-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate skills.json
+        run: |
+          # Check JSON is valid
+          jq empty skills.json
+          
+          # Check all skills have required fields
+          jq -e '.skills[] | select(.name and .description and .dependencies != null)' skills.json > /dev/null
+          
+          # Check dependencies reference valid skills
+          SKILL_NAMES=$(jq -r '.skills[].name' skills.json)
+          for dep in $(jq -r '.skills[].dependencies[]' skills.json 2>/dev/null); do
+            if ! echo "$SKILL_NAMES" | grep -q "^${dep}$"; then
+              echo "Error: Invalid dependency '$dep'"
+              exit 1
+            fi
+          done
+          
+          echo "✓ skills.json is valid"

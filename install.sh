@@ -49,28 +49,34 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Available skills
-AVAILABLE_SKILLS="reddit twitter domain-hunter producthunt requesthunt"
-
 # Track installed skills to avoid duplicates
 INSTALLED_SKILLS=""
-
-# Get dependencies for a skill
-get_skill_deps() {
-    local skill=$1
-    case $skill in
-        reddit) echo "" ;;
-        twitter) echo "" ;;
-        domain-hunter) echo "twitter reddit" ;;
-        producthunt) echo "" ;;
-        requesthunt) echo "" ;;
-        *) echo "" ;;
-    esac
-}
 
 # Path to skills.json (set after determining source)
 SKILLS_JSON_PATH=""
 SKILLS_JSON_CONTENT=""
+
+# Check if jq is available
+check_jq() {
+    if command -v jq &> /dev/null; then
+        return 0
+    fi
+    
+    print_warning "jq not found, attempting to install..."
+    
+    if command -v brew &> /dev/null; then
+        brew install jq 2>/dev/null && return 0
+    elif command -v apt-get &> /dev/null; then
+        sudo apt-get install -y jq 2>/dev/null && return 0
+    elif command -v yum &> /dev/null; then
+        sudo yum install -y jq 2>/dev/null && return 0
+    elif command -v apk &> /dev/null; then
+        sudo apk add jq 2>/dev/null && return 0
+    fi
+    
+    print_error "Please install jq: https://stedolan.github.io/jq/download/"
+    exit 1
+}
 
 # Load skills.json content
 load_skills_json() {
@@ -84,50 +90,50 @@ load_skills_json() {
     else
         # Download skills.json from GitHub
         SKILLS_JSON_CONTENT=$(curl -fsSL "$REPO_RAW/skills.json" 2>/dev/null) || {
-            print_warning "Could not load skills.json for auth info"
-            return 1
+            print_error "Could not load skills.json"
+            exit 1
         }
     fi
 }
 
-# Extract a field from a skill's JSON block using grep/sed
-# Usage: get_skill_field "twitter" "env_var"
-get_skill_field() {
-    local skill=$1
-    local field=$2
-
+# Get all available skill names from skills.json
+get_available_skills() {
     load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -r '.skills[].name' | tr '\n' ' '
+}
 
-    # Extract the skill block and find the field
-    # This is a simple parser that works for our JSON structure
-    echo "$SKILLS_JSON_CONTENT" | awk -v skill="$skill" -v field="$field" '
-        BEGIN { in_skill = 0; in_auth = 0; brace_count = 0 }
-        /"name"[[:space:]]*:[[:space:]]*"'"$skill"'"/ { in_skill = 1 }
-        in_skill && /"auth"[[:space:]]*:/ { in_auth = 1 }
-        in_skill && in_auth {
-            if ($0 ~ "\"" field "\"[[:space:]]*:") {
-                gsub(/.*"'"$field"'"[[:space:]]*:[[:space:]]*"?/, "")
-                gsub(/".*/, "")
-                gsub(/,.*/, "")
-                gsub(/^[[:space:]]+|[[:space:]]+$/, "")
-                print
-                exit
-            }
-        }
-        in_skill && /^[[:space:]]*\{/ { brace_count++ }
-        in_skill && /^[[:space:]]*\}/ {
-            brace_count--
-            if (brace_count <= 0) { in_skill = 0; in_auth = 0 }
-        }
-    '
+# Validate if a skill exists in skills.json
+validate_skill() {
+    local skill=$1
+    load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -e --arg s "$skill" \
+        '.skills[] | select(.name == $s)' > /dev/null 2>&1
+}
+
+# Get dependencies for a skill from skills.json
+get_skill_deps() {
+    local skill=$1
+    load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .dependencies // [] | .[]' 2>/dev/null | tr '\n' ' '
+}
+
+# Get skill description from skills.json
+get_skill_description() {
+    local skill=$1
+    load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .description // ""' 2>/dev/null
 }
 
 # Check if skill requires authentication
 skill_requires_auth() {
     local skill=$1
     load_skills_json || return 1
-
-    local required=$(get_skill_field "$skill" "required")
+    
+    local required=$(echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .auth.required // false' 2>/dev/null)
+    
     if [ "$required" = "true" ]; then
         return 0  # true - requires auth
     else
@@ -138,22 +144,25 @@ skill_requires_auth() {
 # Get environment variable name for skill auth
 get_skill_env_var() {
     local skill=$1
-    get_skill_field "$skill" "env_var"
+    load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .auth.env_var // empty' 2>/dev/null
 }
 
 # Get auth note/instructions for skill
 get_skill_auth_note() {
     local skill=$1
-    get_skill_field "$skill" "note"
+    load_skills_json || return 1
+    echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .auth.note // empty' 2>/dev/null
 }
 
 # Get example URL for skill from links.example
 get_skill_example_url() {
     local skill=$1
     load_skills_json || return 1
-
-    # Simple grep-based extraction: find skill block, then look for example URL
-    echo "$SKILLS_JSON_CONTENT" | grep -A 100 "\"name\": *\"$skill\"" | grep -m1 '"example"' | sed 's/.*"example"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/'
+    echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill" \
+        '.skills[] | select(.name == $s) | .links.example // empty' 2>/dev/null
 }
 
 # Detect user's shell profile
@@ -338,12 +347,16 @@ show_help() {
     echo "Usage: ./install.sh [OPTIONS] <skill>"
     echo ""
     echo "Skills:"
-    echo "  reddit         Reddit content search via public JSON API"
-    echo "  twitter        Twitter/X search via twitterapi.io"
-    echo "  domain-hunter  Domain search and price comparison"
-    echo "  producthunt    Product Hunt posts, topics, users, collections"
-    echo "  requesthunt    User demand research from Reddit, X, GitHub"
-    echo "  all            Install all skills"
+    # Dynamically list skills from skills.json
+    load_skills_json 2>/dev/null
+    if [ -n "$SKILLS_JSON_CONTENT" ]; then
+        echo "$SKILLS_JSON_CONTENT" | jq -r '.skills[] | "  \(.name | . + " " * (15 - length)) \(.description | .[0:50])..."' 2>/dev/null || {
+            echo "  (run with -h after jq is installed to see skill list)"
+        }
+    else
+        echo "  (skills list loaded from skills.json)"
+    fi
+    echo "  all              Install all skills"
     echo ""
     echo "Options:"
     echo "  -t, --tool TOOL    Target tool: claude, droid, opencode, cursor, custom"
@@ -565,23 +578,34 @@ if [ -z "$SKILL" ]; then
     print_header
     echo "Select a skill to install:"
     echo ""
-    echo "  1) reddit         - Reddit content search"
-    echo "  2) twitter        - Twitter/X search"
-    echo "  3) domain-hunter  - Domain price comparison"
-    echo "  4) producthunt    - Product Hunt search"
-    echo "  5) requesthunt    - User demand research"
-    echo "  6) all            - All skills"
+    
+    # Build dynamic menu from skills.json
+    load_skills_json
+    SKILL_NAMES=$(echo "$SKILLS_JSON_CONTENT" | jq -r '.skills[].name')
+    SKILL_COUNT=$(echo "$SKILL_NAMES" | wc -l | xargs)
+    
+    local i=1
+    while IFS= read -r skill_name; do
+        local desc=$(echo "$SKILLS_JSON_CONTENT" | jq -r --arg s "$skill_name" \
+            '.skills[] | select(.name == $s) | .description | .[0:40]' 2>/dev/null)
+        printf "  %d) %-15s - %s...\n" "$i" "$skill_name" "$desc"
+        ((i++))
+    done <<< "$SKILL_NAMES"
+    
+    echo "  $i) all            - All skills"
     echo ""
-    read -p "Enter choice [1-6]: " choice
-    case $choice in
-        1) SKILL="reddit" ;;
-        2) SKILL="twitter" ;;
-        3) SKILL="domain-hunter" ;;
-        4) SKILL="producthunt" ;;
-        5) SKILL="requesthunt" ;;
-        6) SKILL="all" ;;
-        *) print_error "Invalid choice"; exit 1 ;;
-    esac
+    
+    local all_choice=$i
+    read -p "Enter choice [1-$all_choice]: " choice
+    
+    if [ "$choice" = "$all_choice" ]; then
+        SKILL="all"
+    elif [ "$choice" -ge 1 ] && [ "$choice" -lt "$all_choice" ] 2>/dev/null; then
+        SKILL=$(echo "$SKILL_NAMES" | sed -n "${choice}p")
+    else
+        print_error "Invalid choice"
+        exit 1
+    fi
 fi
 
 if [ -z "$TOOL" ]; then
@@ -636,6 +660,23 @@ if [ -n "${BASH_SOURCE[0]:-}" ] && [ "${BASH_SOURCE[0]}" != "bash" ] && [ -f "${
     fi
 fi
 
+# Check jq is available (required for parsing skills.json)
+check_jq
+
+# Load skills.json early
+load_skills_json
+
+# Validate skill name if not "all"
+if [ "$SKILL" != "all" ]; then
+    if ! validate_skill "$SKILL"; then
+        print_error "Unknown skill: $SKILL"
+        echo ""
+        echo "Available skills:"
+        get_available_skills | tr ' ' '\n' | sed 's/^/  /'
+        exit 1
+    fi
+fi
+
 print_header
 echo "Installing to: $TARGET_DIR"
 echo ""
@@ -651,7 +692,8 @@ mkdir -p "$TARGET_DIR"
 
 # Install skill(s) with dependencies
 if [ "$SKILL" = "all" ]; then
-    for s in $AVAILABLE_SKILLS; do
+    ALL_SKILLS=$(get_available_skills)
+    for s in $ALL_SKILLS; do
         install_with_deps "$s" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
     done
 else
