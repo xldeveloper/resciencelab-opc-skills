@@ -146,7 +146,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
     .badge { display: inline-block; border: 1px solid var(--black); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
     h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
     .subtitle { font-size: 14px; color: var(--gray-600); max-width: 480px; margin: 0 auto 24px; }
-    .hero-install { max-width: 600px; margin: 0 auto; }
+    .hero-install { max-width: 600px; margin: 0 auto; width: 100%; }
     .hero-level-tabs { border-bottom: 1px solid var(--black); }
     .hero-tool-tabs { border-bottom: none; }
     .hero-tabs { display: flex; border: 1px solid var(--black); border-bottom: none; }
