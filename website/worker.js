@@ -142,6 +142,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
     .github-btn svg { width: 14px; height: 14px; }
     
     .hero { text-align: center; padding: 60px 24px; border-bottom: 1px solid var(--black); }
+    .hero-banner { max-width: 800px; width: 100%; height: auto; margin-bottom: 32px; border-radius: 8px; }
     .badge { display: inline-block; border: 1px solid var(--black); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
     h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
     .subtitle { font-size: 14px; color: var(--gray-600); max-width: 480px; margin: 0 auto 24px; }
@@ -277,6 +278,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
   </header>
 
   <section class="hero">
+    <img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-banner.png" alt="OPC Skills" class="hero-banner">
     <div class="badge">${skills.length} Skills</div>
     <h1>Agent Skills for<br>One Person Companies</h1>
     <p class="subtitle">Curated skills for solopreneurs and indie hackers. One-click install for Claude Code, Factory Droid, Cursor, and more.</p>

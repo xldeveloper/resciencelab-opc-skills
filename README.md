@@ -1,5 +1,9 @@
 # OPC Skills
 
+<p align="center">
+  <img src="website/opc-banner.png" alt="OPC Skills" width="100%">
+</p>
+
 Agent Skills for One Person Companies (OPC) - a collection of skills designed for solopreneurs, indie hackers, and small teams.
 
 ## What are Skills?
