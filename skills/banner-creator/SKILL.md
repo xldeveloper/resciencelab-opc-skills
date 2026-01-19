@@ -24,8 +24,7 @@ Create professional banners through AI image generation with an iterative design
 **Required Skills:**
 - `nanobanana` - AI image generation (Gemini 3 Pro Image)
 
-**Optional Tools:**
-- `chrome-devtools` MCP - For previewing banners in browser
+
 
 ## File Output Location
 
@@ -115,11 +114,10 @@ Copy the preview template and open in browser:
 cp <skill_dir>/templates/preview.html .skill-archive/banner-creator/<yyyy-mm-dd-summaryname>/preview.html
 ```
 
-Then use Chrome DevTools MCP to view:
+Then open in default browser:
 
-```
-chrome-devtools___navigate_page(url: "file://.skill-archive/banner-creator/<yyyy-mm-dd-summaryname>/preview.html")
-chrome-devtools___take_screenshot(fullPage: true)
+```bash
+open .skill-archive/banner-creator/<yyyy-mm-dd-summaryname>/preview.html
 ```
 
 **IMPORTANT:** Update the HTML to include the correct number of banners generated.
