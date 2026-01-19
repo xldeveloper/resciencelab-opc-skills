@@ -142,12 +142,21 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
     .github-btn svg { width: 14px; height: 14px; }
     
     .hero { text-align: center; padding: 60px 24px; border-bottom: 1px solid var(--black); }
-    .hero-banner { max-width: 800px; width: 100%; height: auto; margin-bottom: 32px; border-radius: 8px; }
+    .hero-banner { max-width: 560px; width: 100%; height: auto; margin: 0 auto 24px; border-radius: 8px; display: block; }
     .badge { display: inline-block; border: 1px solid var(--black); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
     h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
     .subtitle { font-size: 14px; color: var(--gray-600); max-width: 480px; margin: 0 auto 24px; }
-    .install-all { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--black); color: var(--white); border: none; font-family: var(--font); font-size: 12px; cursor: pointer; }
-    .install-all:hover { opacity: 0.9; }
+    .hero-install { max-width: 600px; margin: 0 auto; }
+    .hero-level-tabs { border-bottom: 1px solid var(--black); }
+    .hero-tool-tabs { border-bottom: none; }
+    .hero-tabs { display: flex; border: 1px solid var(--black); border-bottom: none; }
+    .hero-tab { flex: 1; padding: 8px 12px; background: var(--white); border: none; font-family: var(--font); font-size: 11px; cursor: pointer; border-right: 1px solid var(--black); }
+    .hero-tab:last-child { border-right: none; }
+    .hero-tab.active { background: var(--black); color: var(--white); }
+    .hero-cmd { display: flex; border: 1px solid var(--black); }
+    .hero-cmd code { flex: 1; padding: 12px; font-size: 11px; background: var(--gray-100); overflow-x: auto; white-space: nowrap; }
+    .hero-cmd .copy-btn { padding: 12px 16px; background: var(--black); color: var(--white); border: none; font-family: var(--font); font-size: 11px; cursor: pointer; border-left: 1px solid var(--black); }
+    .hero-cmd .copy-btn:hover { opacity: 0.9; }
     
     main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
     .section-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; text-align: center; }
@@ -215,7 +224,9 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       .badge { font-size: 9px; padding: 4px 10px; }
       h1 { font-size: 24px; line-height: 1.3; }
       .subtitle { font-size: 13px; }
-      .install-all { padding: 10px 16px; font-size: 11px; }
+      .hero-tabs { flex-wrap: wrap; }
+      .hero-tab { flex: 1 1 auto; min-width: 60px; padding: 6px 8px; font-size: 10px; }
+      .hero-cmd code { font-size: 9px; padding: 10px; }
       
       main { padding: 24px 16px; }
       .section-title { font-size: 16px; }
@@ -279,13 +290,25 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
 
   <section class="hero">
     <img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-banner.png" alt="OPC Skills" class="hero-banner">
-    <div class="badge">${skills.length} Skills</div>
     <h1>Agent Skills for<br>One Person Companies</h1>
     <p class="subtitle">Curated skills for solopreneurs and indie hackers. One-click install for Claude Code, Factory Droid, Cursor, and more.</p>
-    <button class="install-all" onclick="copyAllInstall()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg>
-      Install All Skills
-    </button>
+    <div class="hero-install">
+      <div class="hero-tabs hero-level-tabs">
+        <button class="hero-tab active" data-level="user">User-level</button>
+        <button class="hero-tab" data-level="project">Project-level</button>
+      </div>
+      <div class="hero-tabs hero-tool-tabs">
+        <button class="hero-tab active" data-tool="claude">Claude</button>
+        <button class="hero-tab" data-tool="droid">Droid</button>
+        <button class="hero-tab" data-tool="opencode">OpenCode</button>
+        <button class="hero-tab" data-tool="codex">Codex</button>
+        <button class="hero-tab" data-tool="cursor">Cursor</button>
+      </div>
+      <div class="hero-cmd">
+        <code id="hero-cmd-code" data-cmd="curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude all">curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude all</code>
+        <button class="copy-btn" onclick="copyHeroCmd(this)">Copy</button>
+      </div>
+    </div>
   </section>
 
   <main>
@@ -314,10 +337,40 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       });
     }
     
-    function copyAllInstall() {
-      const cmd = 'curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude all';
-      navigator.clipboard.writeText(cmd).then(() => showToast('Install command copied!'));
+    function copyHeroCmd(btn) {
+      const code = document.getElementById('hero-cmd-code');
+      navigator.clipboard.writeText(code.dataset.cmd).then(() => {
+        btn.textContent = 'Copied!';
+        showToast('Install command copied!');
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
     }
+    
+    function updateHeroCmd() {
+      const level = document.querySelector('.hero-level-tabs .hero-tab.active').dataset.level;
+      const tool = document.querySelector('.hero-tool-tabs .hero-tab.active').dataset.tool;
+      const levelFlag = level === 'project' ? ' -p' : '';
+      const cmd = 'curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t ' + tool + levelFlag + ' all';
+      const code = document.getElementById('hero-cmd-code');
+      code.textContent = cmd;
+      code.dataset.cmd = cmd;
+    }
+    
+    document.querySelectorAll('.hero-level-tabs .hero-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.hero-level-tabs .hero-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        updateHeroCmd();
+      });
+    });
+    
+    document.querySelectorAll('.hero-tool-tabs .hero-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.hero-tool-tabs .hero-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        updateHeroCmd();
+      });
+    });
     
     function showToast(msg = 'Copied to clipboard!') {
       const toast = document.getElementById('toast');
