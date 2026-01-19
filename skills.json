@@ -246,6 +246,43 @@
         "github": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/logo-creator",
         "example": "https://github.com/ReScienceLab/opc-skills/blob/main/skills/logo-creator/examples/opc-logo-creation.md"
       }
+    },
+    {
+      "name": "banner-creator",
+      "version": "1.0.0",
+      "description": "Create banners using AI image generation. Discuss format/style, generate variations, iterate with user feedback, crop to target ratio for GitHub, Twitter, LinkedIn, etc.",
+      "icon": "image",
+      "color": "F59E0B",
+      "triggers": ["banner", "header", "hero image", "cover image", "create banner", "github banner", "twitter header", "readme banner"],
+      "dependencies": [],
+      "auth": {
+        "required": false,
+        "type": null,
+        "note": "Uses nano-banana-pro for image generation (no additional API keys needed)"
+      },
+      "install": {
+        "user": {
+          "claude": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude banner-creator",
+          "droid": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t droid banner-creator",
+          "opencode": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t opencode banner-creator",
+          "codex": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t codex banner-creator"
+        },
+        "project": {
+          "claude": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t claude -p banner-creator",
+          "droid": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t droid -p banner-creator",
+          "cursor": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t cursor -p banner-creator",
+          "opencode": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t opencode -p banner-creator",
+          "codex": "curl -fsSL https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/install.sh | bash -s -- -t codex -p banner-creator"
+        }
+      },
+      "commands": [
+        "nano-banana-pro___generate_image(prompt, aspectRatio: '21:9', fileName)",
+        "python3 scripts/crop_banner.py {input.png} {output.png} --ratio 2:1 --width 1280"
+      ],
+      "links": {
+        "github": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/banner-creator",
+        "example": "https://github.com/ReScienceLab/opc-skills/blob/main/skills/banner-creator/examples/opc-banner-creation.md"
+      }
     }
   ]
 }
