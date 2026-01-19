@@ -16,7 +16,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+DIM='\033[2m'
 NC='\033[0m' # No Color
+
+# Progress tracking
+TOTAL_SKILLS=0
+CURRENT_SKILL=0
 
 print_header() {
     echo -e "${BLUE}"
@@ -29,7 +35,51 @@ print_header() {
 EOF
     echo -e "${NC}"
     echo -e "${BLUE}       Skills Installer${NC}"
+    print_separator
+}
+
+print_separator() {
+    echo -e "${DIM}──────────────────────────────────────${NC}"
+}
+
+print_dependency_tree() {
+    local skill=$1
+    local deps=$(get_skill_deps "$skill")
+    
     echo ""
+    echo -e "  ${CYAN}Installing:${NC}"
+    
+    if [ -n "$deps" ]; then
+        echo -e "  └─ ${skill}"
+        local dep_array=($deps)
+        local last_idx=$((${#dep_array[@]} - 1))
+        local i=0
+        for dep in $deps; do
+            if [ $i -eq $last_idx ]; then
+                echo -e "     └─ ${DIM}${dep}${NC}"
+            else
+                echo -e "     ├─ ${DIM}${dep}${NC}"
+            fi
+            ((i++))
+        done
+    else
+        echo -e "  └─ ${skill}"
+    fi
+    echo ""
+}
+
+print_install_progress() {
+    local skill=$1
+    local status=$2
+    
+    ((CURRENT_SKILL++))
+    if [ "$status" = "start" ]; then
+        printf "  [%d/%d] %-18s " "$CURRENT_SKILL" "$TOTAL_SKILLS" "$skill"
+    elif [ "$status" = "done" ]; then
+        echo -e "${GREEN}✓${NC}"
+    elif [ "$status" = "fail" ]; then
+        echo -e "${RED}✗${NC}"
+    fi
 }
 
 print_success() {
@@ -194,49 +244,12 @@ get_shell_profile() {
     esac
 }
 
-# Check if an environment variable is set
+# Check if an environment variable is set (handles comma-separated list)
 is_env_var_set() {
-    local var_name=$1
-    eval "[ -n \"\${$var_name:-}\" ]"
-}
-
-# Print auth instructions for a single skill
-print_skill_auth_instructions() {
-    local skill=$1
-    local is_dependency=$2
-    local env_var=$(get_skill_env_var "$skill")
-    local auth_note=$(get_skill_auth_note "$skill")
-    local shell_profile=$(get_shell_profile)
-
-    # Check if API key is already configured
-    if is_env_var_set "$env_var"; then
-        if [ "$is_dependency" = "true" ]; then
-            print_success "$skill skill (dependency): API key already configured (\$$env_var)"
-        else
-            print_success "$skill skill: API key already configured (\$$env_var)"
-        fi
-        return 0
-    fi
-
-    # API key not configured - show instructions
-    if [ "$is_dependency" = "true" ]; then
-        echo -e "${YELLOW}⚠  Dependency requires API Key:${NC}"
-        echo "   The $skill skill (dependency) requires authentication:"
-    else
-        echo -e "${YELLOW}⚠  API Key Required:${NC}"
-    fi
-    echo ""
-    echo "   Environment variable: $env_var"
-    if [ -n "$auth_note" ]; then
-        echo "   $auth_note"
-    fi
-    echo ""
-    echo "   Add to your shell profile ($shell_profile):"
-    echo ""
-    echo -e "   ${BLUE}export $env_var=\"your_api_key_here\"${NC}"
-    echo ""
-    echo "   Then run: source $shell_profile"
-    echo ""
+    local var_names=$1
+    # Handle comma-separated list - check first variable only
+    local first_var=$(echo "$var_names" | cut -d',' -f1 | xargs)
+    eval "[ -n \"\${$first_var:-}\" ]"
 }
 
 # Print post-install instructions with auth awareness
@@ -245,114 +258,92 @@ print_post_install_instructions() {
     local installed_skills=$2
 
     echo ""
+    print_separator
     print_success "Installation complete!"
+    print_separator
+    echo ""
 
-    # Collect all skills that need auth (main skill + dependencies)
-    local skills_needing_auth=""
-    local skills_no_auth=""
-
-    for s in $installed_skills; do
-        if skill_requires_auth "$s"; then
-            skills_needing_auth="$skills_needing_auth $s"
-        else
-            skills_no_auth="$skills_no_auth $s"
-        fi
-    done
-
-    # Trim whitespace
-    skills_needing_auth=$(echo "$skills_needing_auth" | xargs)
-    skills_no_auth=$(echo "$skills_no_auth" | xargs)
-
-    # Show dependencies info if installed multiple skills
+    # Count installed skills
     local skill_count=$(echo "$installed_skills" | wc -w | xargs)
-    if [ "$skill_count" -gt 1 ]; then
-        local deps_list=""
-        for s in $installed_skills; do
-            if [ "$s" != "$skill" ]; then
-                if [ -z "$deps_list" ]; then
-                    deps_list="$s"
-                else
-                    deps_list="$deps_list, $s"
-                fi
-            fi
-        done
-        if [ -n "$deps_list" ]; then
-            echo "  Installed: $skill (+ dependencies: $deps_list)"
-        fi
+    local dep_count=$((skill_count - 1))
+    
+    if [ "$skill" = "all" ]; then
+        echo -e "  Installed ${GREEN}$skill_count${NC} skills"
+    elif [ "$dep_count" -gt 0 ]; then
+        echo -e "  Installed ${GREEN}$skill${NC} + $dep_count dependencies"
+    else
+        echo -e "  Installed ${GREEN}$skill${NC}"
     fi
     echo ""
 
-    # Track which skills have missing API keys
+    # Show API key status for each skill
+    echo -e "  ${CYAN}API Keys:${NC}"
     local skills_missing_keys=""
-
-    # Print auth instructions for skills that need them
-    if [ -n "$skills_needing_auth" ]; then
-        # Get dependencies for the main skill
-        local main_deps=""
-        if [ "$skill" != "all" ]; then
-            main_deps=$(get_skill_deps "$skill")
-        fi
-
-        for s in $skills_needing_auth; do
-            # Check if this skill is a dependency (not the main skill and not "all" install)
-            local is_dep="false"
-            if [ "$skill" != "all" ] && [ "$s" != "$skill" ]; then
-                # Check if it's in the dependencies list
-                if echo " $main_deps " | grep -q " $s "; then
-                    is_dep="true"
-                fi
-            fi
-            
-            # Check if API key is missing for this skill
-            local env_var=$(get_skill_env_var "$s")
-            if ! is_env_var_set "$env_var"; then
+    
+    for s in $installed_skills; do
+        local env_var=$(get_skill_env_var "$s")
+        if skill_requires_auth "$s"; then
+            if is_env_var_set "$env_var"; then
+                printf "    ${GREEN}✓${NC} %-16s ${DIM}configured${NC}\n" "$s"
+            else
+                printf "    ${YELLOW}⚠${NC} %-16s ${YELLOW}missing${NC} (${DIM}$env_var${NC})\n" "$s"
                 skills_missing_keys="$skills_missing_keys $s"
             fi
-            
-            print_skill_auth_instructions "$s" "$is_dep"
-        done
-    fi
+        else
+            printf "    ${GREEN}✓${NC} %-16s ${DIM}not required${NC}\n" "$s"
+        fi
+    done
+    echo ""
 
     # Trim whitespace
     skills_missing_keys=$(echo "$skills_missing_keys" | xargs)
 
-    # Show status of skills that don't need auth
-    if [ -n "$skills_no_auth" ]; then
-        for s in $skills_no_auth; do
-            print_success "$s skill: No API key required"
+    # Show missing key instructions if needed
+    if [ -n "$skills_missing_keys" ]; then
+        echo -e "  ${YELLOW}Configure missing keys:${NC}"
+        local shell_profile=$(get_shell_profile)
+        local shown_vars=""
+        for s in $skills_missing_keys; do
+            local env_vars=$(get_skill_env_var "$s")
+            local auth_note=$(get_skill_auth_note "$s")
+            # Handle comma-separated env vars
+            local first_var=$(echo "$env_vars" | cut -d',' -f1 | xargs)
+            # Skip if already shown
+            if echo "$shown_vars" | grep -q "$first_var"; then
+                continue
+            fi
+            shown_vars="$shown_vars $first_var"
+            echo -e "    export $first_var=\"...\""
+            if [ -n "$auth_note" ]; then
+                echo -e "    ${DIM}# $auth_note${NC}"
+            fi
         done
         echo ""
     fi
 
-    # If no auth required at all, show simple ready message
-    if [ -z "$skills_needing_auth" ]; then
-        print_success "No API key required - ready to use!"
-        echo ""
-    fi
-
     # Next steps
-    echo "Next steps:"
+    echo -e "  ${CYAN}Next steps:${NC}"
     local example_skill="$skill"
     if [ "$skill" = "all" ]; then
-        # Pick a good example skill from the installed list
         example_skill=$(echo "$installed_skills" | awk '{print $1}')
     fi
 
     if [ -n "$skills_missing_keys" ]; then
-        echo "  1. Configure the missing API key(s) above"
-        echo "  2. Restart your AI coding assistant"
-        echo "  3. Try: 'Use the $example_skill skill to...'"
+        echo "    1. Configure the missing API key(s)"
+        echo "    2. Restart your AI coding assistant"
+        echo "    3. Try: \"Use the $example_skill skill to...\""
     else
-        echo "  1. Restart your AI coding assistant"
-        echo "  2. Try: 'Use the $example_skill skill to...'"
+        echo "    1. Restart your AI coding assistant"
+        echo "    2. Try: \"Use the $example_skill skill to...\""
     fi
 
-    # Show example URL if available for the main skill
+    # Show example URL if available
     local example_url=$(get_skill_example_url "$skill")
     if [ -n "$example_url" ]; then
         echo ""
-        echo -e "${BLUE}Example:${NC} $example_url"
+        echo -e "  ${CYAN}Docs:${NC} ${DIM}$example_url${NC}"
     fi
+    echo ""
 }
 
 show_help() {
@@ -450,12 +441,15 @@ download_skill() {
     local skill=$1
     local target_dir=$2
     
-    print_info "Downloading $skill..."
+    # Show progress
+    ((CURRENT_SKILL++))
+    printf "  [%d/%d] %-18s " "$CURRENT_SKILL" "$TOTAL_SKILLS" "$skill"
     
     mkdir -p "$target_dir/$skill"
     
     # Download SKILL.md
     curl -fsSL "$REPO_RAW/skills/$skill/SKILL.md" -o "$target_dir/$skill/SKILL.md" 2>/dev/null || {
+        echo -e "${RED}✗${NC}"
         print_error "Failed to download $skill/SKILL.md"
         return 1
     }
@@ -490,7 +484,7 @@ download_skill() {
         done
     fi
     
-    print_success "Installed $skill to $target_dir/$skill"
+    echo -e "${GREEN}✓${NC}"
 }
 
 # Install a skill with its dependencies
@@ -512,7 +506,6 @@ install_with_deps() {
     if [ -n "$deps" ] && [ "$INSTALL_DEPS" = "true" ]; then
         for dep in $deps; do
             if ! echo "$INSTALLED_SKILLS" | grep -q " $dep "; then
-                print_info "Installing dependency: $dep"
                 install_with_deps "$dep" "$target_dir" "$source_dir" "$use_local"
             fi
         done
@@ -534,19 +527,23 @@ install_skill_from_local() {
     local source_dir=$3
 
     if [ ! -d "$source_dir/$skill" ]; then
+        echo -e "${RED}✗${NC}"
         print_error "Skill '$skill' not found in $source_dir"
         return 1
     fi
 
+    # Show progress
+    ((CURRENT_SKILL++))
+    printf "  [%d/%d] %-18s " "$CURRENT_SKILL" "$TOTAL_SKILLS" "$skill"
+
     mkdir -p "$target_dir"
     
     if [ -d "$target_dir/$skill" ]; then
-        print_warning "Skill '$skill' already exists, updating..."
         rm -rf "$target_dir/$skill"
     fi
 
     cp -r "$source_dir/$skill" "$target_dir/"
-    print_success "Installed $skill to $target_dir/$skill"
+    echo -e "${GREEN}✓${NC}"
 }
 
 # Parse arguments
@@ -690,14 +687,14 @@ if [ "$SKILL" != "all" ]; then
 fi
 
 print_header
-echo "Installing to: $TARGET_DIR"
-echo ""
 
-# Check if running from local repo
+# Show install info
+echo ""
+echo -e "  ${CYAN}Target:${NC} $TARGET_DIR"
 if [ "$USE_LOCAL" = "true" ]; then
-    print_info "Using local repository..."
+    echo -e "  ${CYAN}Source:${NC} Local"
 else
-    print_info "Downloading from GitHub..."
+    echo -e "  ${CYAN}Source:${NC} GitHub"
 fi
 
 mkdir -p "$TARGET_DIR"
@@ -705,15 +702,33 @@ mkdir -p "$TARGET_DIR"
 # Install skill(s) with dependencies
 if [ "$SKILL" = "all" ]; then
     ALL_SKILLS=$(get_available_skills)
+    # Count total skills
+    TOTAL_SKILLS=$(echo "$ALL_SKILLS" | wc -w | xargs)
+    
+    echo ""
+    echo -e "  ${CYAN}Installing:${NC} all ($TOTAL_SKILLS skills)"
+    echo ""
+    print_separator
+    echo ""
+    
     for s in $ALL_SKILLS; do
         install_with_deps "$s" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
     done
 else
-    # Show dependencies info
+    # Get dependencies and calculate total
     deps=$(get_skill_deps "$SKILL")
     if [ -n "$deps" ] && [ "$INSTALL_DEPS" = "true" ]; then
-        print_info "Will also install dependencies: $deps"
+        dep_count=$(echo "$deps" | wc -w | xargs)
+        TOTAL_SKILLS=$((dep_count + 1))
+    else
+        TOTAL_SKILLS=1
     fi
+    
+    # Show dependency tree
+    print_dependency_tree "$SKILL"
+    print_separator
+    echo ""
+    
     install_with_deps "$SKILL" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
 fi
 
