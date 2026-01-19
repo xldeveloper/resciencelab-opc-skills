@@ -437,54 +437,60 @@ get_skills_dir() {
     esac
 }
 
-download_skill() {
-    local skill=$1
-    local target_dir=$2
+# Batch download skills using tarball (single HTTP request)
+download_skills_batch() {
+    local target_dir=$1
+    shift
+    local skills_to_install="$@"
     
-    # Show progress
-    ((CURRENT_SKILL++))
-    printf "  [%d/%d] %-18s " "$CURRENT_SKILL" "$TOTAL_SKILLS" "$skill"
+    local temp_tar="/tmp/opc-skills-$$.tar.gz"
+    local temp_dir="/tmp/opc-skills-$$"
     
-    mkdir -p "$target_dir/$skill"
-    
-    # Download SKILL.md
-    curl -fsSL "$REPO_RAW/skills/$skill/SKILL.md" -o "$target_dir/$skill/SKILL.md" 2>/dev/null || {
-        echo -e "${RED}✗${NC}"
-        print_error "Failed to download $skill/SKILL.md"
+    # Download entire repo as tarball (single request)
+    print_info "Downloading skills package..."
+    curl -fsSL "https://api.github.com/repos/ReScienceLab/opc-skills/tarball" \
+        -o "$temp_tar" 2>/dev/null || {
+        print_error "Failed to download skills package"
         return 1
     }
     
-    # Get list of files in skill directory from GitHub API
-    local files_json=$(curl -fsSL "https://api.github.com/repos/ReScienceLab/opc-skills/contents/skills/$skill" 2>/dev/null)
+    # Extract tarball
+    mkdir -p "$temp_dir"
+    tar -xzf "$temp_tar" -C "$temp_dir" 2>/dev/null || {
+        print_error "Failed to extract skills package"
+        rm -rf "$temp_tar" "$temp_dir"
+        return 1
+    }
     
-    # Download scripts directory if exists
-    if echo "$files_json" | grep -q '"name": *"scripts"'; then
-        mkdir -p "$target_dir/$skill/scripts"
-        local scripts_json=$(curl -fsSL "https://api.github.com/repos/ReScienceLab/opc-skills/contents/skills/$skill/scripts" 2>/dev/null)
-        
-        # Parse and download each script file
-        echo "$scripts_json" | grep -o '"download_url": *"[^"]*"' | cut -d'"' -f4 | while read -r url; do
-            if [ -n "$url" ] && [ "$url" != "null" ]; then
-                local filename=$(basename "$url")
-                curl -fsSL "$url" -o "$target_dir/$skill/scripts/$filename" 2>/dev/null
-            fi
-        done
+    # Find extracted directory (contains commit hash in name)
+    local extracted_dir=$(ls -d "$temp_dir"/ReScienceLab-opc-skills-* 2>/dev/null | head -1)
+    
+    if [ -z "$extracted_dir" ] || [ ! -d "$extracted_dir/skills" ]; then
+        print_error "Invalid skills package structure"
+        rm -rf "$temp_tar" "$temp_dir"
+        return 1
     fi
     
-    # Download references directory if exists
-    if echo "$files_json" | grep -q '"name": *"references"'; then
-        mkdir -p "$target_dir/$skill/references"
-        local refs_json=$(curl -fsSL "https://api.github.com/repos/ReScienceLab/opc-skills/contents/skills/$skill/references" 2>/dev/null)
-        
-        echo "$refs_json" | grep -o '"download_url": *"[^"]*"' | cut -d'"' -f4 | while read -r url; do
-            if [ -n "$url" ] && [ "$url" != "null" ]; then
-                local filename=$(basename "$url")
-                curl -fsSL "$url" -o "$target_dir/$skill/references/$filename" 2>/dev/null
-            fi
-        done
-    fi
+    echo ""
     
-    echo -e "${GREEN}✓${NC}"
+    # Copy each skill
+    for skill in $skills_to_install; do
+        ((CURRENT_SKILL++))
+        printf "  [%d/%d] %-18s " "$CURRENT_SKILL" "$TOTAL_SKILLS" "$skill"
+        
+        if [ -d "$extracted_dir/skills/$skill" ]; then
+            [ -d "$target_dir/$skill" ] && rm -rf "$target_dir/$skill"
+            cp -r "$extracted_dir/skills/$skill" "$target_dir/"
+            echo -e "${GREEN}✓${NC}"
+            INSTALLED_SKILLS="$INSTALLED_SKILLS $skill "
+        else
+            echo -e "${RED}✗${NC}"
+            print_error "Skill '$skill' not found in package"
+        fi
+    done
+    
+    # Cleanup
+    rm -rf "$temp_tar" "$temp_dir"
 }
 
 # Install a skill with its dependencies
@@ -699,6 +705,33 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
+# Collect all skills to install (with dependencies)
+collect_skills_to_install() {
+    local skill=$1
+    local collected=""
+    
+    # Get dependencies first
+    local deps=$(get_skill_deps "$skill")
+    if [ -n "$deps" ] && [ "$INSTALL_DEPS" = "true" ]; then
+        for dep in $deps; do
+            # Recursively collect dependencies
+            local sub_deps=$(collect_skills_to_install "$dep")
+            for sd in $sub_deps; do
+                if ! echo " $collected " | grep -q " $sd "; then
+                    collected="$collected $sd"
+                fi
+            done
+        done
+    fi
+    
+    # Add the skill itself
+    if ! echo " $collected " | grep -q " $skill "; then
+        collected="$collected $skill"
+    fi
+    
+    echo "$collected" | xargs
+}
+
 # Install skill(s) with dependencies
 if [ "$SKILL" = "all" ]; then
     ALL_SKILLS=$(get_available_skills)
@@ -709,11 +742,17 @@ if [ "$SKILL" = "all" ]; then
     echo -e "  ${CYAN}Installing:${NC} all ($TOTAL_SKILLS skills)"
     echo ""
     print_separator
-    echo ""
     
-    for s in $ALL_SKILLS; do
-        install_with_deps "$s" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
-    done
+    if [ "$USE_LOCAL" = "true" ]; then
+        # Local install: use existing method
+        echo ""
+        for s in $ALL_SKILLS; do
+            install_with_deps "$s" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
+        done
+    else
+        # Remote install: use batch download
+        download_skills_batch "$TARGET_DIR" $ALL_SKILLS
+    fi
 else
     # Get dependencies and calculate total
     deps=$(get_skill_deps "$SKILL")
@@ -727,9 +766,16 @@ else
     # Show dependency tree
     print_dependency_tree "$SKILL"
     print_separator
-    echo ""
     
-    install_with_deps "$SKILL" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
+    if [ "$USE_LOCAL" = "true" ]; then
+        # Local install: use existing method
+        echo ""
+        install_with_deps "$SKILL" "$TARGET_DIR" "$SOURCE_DIR" "$USE_LOCAL"
+    else
+        # Remote install: collect all skills and batch download
+        SKILLS_TO_INSTALL=$(collect_skills_to_install "$SKILL")
+        download_skills_batch "$TARGET_DIR" $SKILLS_TO_INSTALL
+    fi
 fi
 
 # Print auth-aware post-install instructions
