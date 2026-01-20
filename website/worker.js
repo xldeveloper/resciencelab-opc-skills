@@ -196,6 +196,30 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
     });
     faqItems.push({
       "@type": "Question",
+      "name": "What are Claude Code skills?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code skills are extensions that add new capabilities to Claude Code, like domain search, Twitter analysis, and Reddit research. They're open source and install with one click. Each skill extends Claude Code with specialized functions for developers, solopreneurs, and indie hackers."
+      }
+    });
+    faqItems.push({
+      "@type": "Question",
+      "name": "How do I install Claude Code extensions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Copy the skill URL from OPC Skills, open Claude Code settings, paste into 'Add Skill', and click install. Each skill takes less than 30 seconds to set up. Or use the one-click install command: curl -fsSL opc.dev/install.sh | bash -s -- -t claude [skill-name]"
+      }
+    });
+    faqItems.push({
+      "@type": "Question",
+      "name": "Are these skills compatible with Cursor AI?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Most OPC Skills work with Claude Code, Cursor, Codex, and other AI coding assistants that support the MCP (Model Context Protocol) standard. Simply change the -t parameter during installation: -t cursor for Cursor AI, -t codex for Codex, or -t claude for Claude Code."
+      }
+    });
+    faqItems.push({
+      "@type": "Question",
       "name": "Is OPC Skills free to use?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -210,8 +234,8 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
           "@type": "WebPage",
           "@id": "https://opc.dev/#webpage",
           "url": "https://opc.dev",
-          "name": "OPC Skills - AI Agent Skills for Solopreneurs & Indie Hackers",
-          "description": `${skills.length}+ curated AI agent skills for solopreneurs and indie hackers. Supercharge Claude Code, Cursor, and Codex with domain hunting, social media research, and more.`,
+          "name": "Claude Code Skills & Extensions | 10+ AI Agent Tools for Developers",
+          "description": `10+ Claude Code skills and extensions for developers. Add Twitter search, Reddit analysis, domain finder, and SEO tools to Claude Code, Cursor, and Codex. One-click install. 100% open source.`,
           "datePublished": "2024-01-01",
           "dateModified": today,
           "inLanguage": "en-US",
@@ -328,11 +352,11 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OPC Skills - AI Agent Skills for Solopreneurs & Indie Hackers | Claude Code, Cursor, Codex</title>
+  <title>Claude Code Skills & Extensions | 10+ AI Agent Tools for Developers</title>
   <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/apple-touch-icon.png">
-  <meta name="description" content="${skills.length}+ curated AI agent skills for solopreneurs and indie hackers. Supercharge Claude Code, Cursor, and Codex with domain hunting, social media research, and more. One-click install.">
+  <meta name="description" content="10+ Claude Code skills and extensions for developers. Add Twitter search, Reddit analysis, domain finder, and SEO tools to Claude Code, Cursor, and Codex. One-click install. 100% open source.">
   <meta name="keywords" content="AI agent skills, solopreneur tools, indie hacker tools, Claude Code skills, Cursor skills, Codex skills, one-person company, solo developer, AI coding assistant, AI automation, vibe coding, agent skills, claude skills, Factory Droid, OpenCode, developer tools, AI agents">
   <meta name="robots" content="index, follow">
   <meta name="author" content="ReScience Lab">
@@ -340,16 +364,16 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
   <meta http-equiv="Content-Language" content="en">
   <link rel="canonical" href="https://opc.dev/">
   <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-  <meta property="og:title" content="OPC Skills - AI Agent Skills for Solopreneurs & Indie Hackers">
-  <meta property="og:description" content="${skills.length}+ curated AI agent skills for solopreneurs and indie hackers. Supercharge Claude Code, Cursor, and Codex with domain hunting, social media research, and more.">
+  <meta property="og:title" content="Claude Code Skills & Extensions | 10+ AI Agent Tools">
+  <meta property="og:description" content="10+ Claude Code skills and extensions for developers. Twitter search, Reddit analysis, domain finder, SEO tools. One-click install. 100% open source.">
   <meta property="og:image" content="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/og-image.png">
   <meta property="og:url" content="https://opc.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="OPC Skills">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="OPC Skills - AI Agent Skills for Solopreneurs & Indie Hackers">
-  <meta name="twitter:description" content="${skills.length}+ curated AI agent skills for solopreneurs and indie hackers. Supercharge Claude Code, Cursor, and Codex.">
+  <meta name="twitter:title" content="Claude Code Skills & Extensions | 10+ AI Agent Tools">
+  <meta name="twitter:description" content="10+ Claude Code skills for developers. Twitter, Reddit, domain search, SEO tools. One-click install. Open source.">
   <meta name="twitter:image" content="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/og-image.png">
   <meta name="twitter:creator" content="@AnyLabxyz">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -554,8 +578,8 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
 
   <section class="hero" role="banner">
     <img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-banner.png" alt="OPC Skills - AI Agent Skills for Solopreneurs and Indie Hackers" class="hero-banner" fetchpriority="high" decoding="async">
-    <h1>AI Agent Skills for<br>Solopreneurs</h1>
-    <p class="subtitle">The skill library for <strong>one-person companies</strong> and <strong>indie hackers</strong>. Extend Claude Code, Cursor, and Codex with <strong>${skills.length}+</strong> automation skills.</p>
+    <h1>Claude Code Skills &<br>Extensions</h1>
+    <p class="subtitle">10+ AI agent skills for <strong>Claude Code</strong>, <strong>Cursor</strong>, and <strong>Codex</strong> developers. Add Twitter search, Reddit analysis, domain finder, and SEO tools with one-click install.</p>
     <div class="stats-bar">
       <span><strong>${skills.length}+</strong> Skills</span>
       <span><strong>5</strong> Platforms</span>
@@ -617,6 +641,24 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
         <h3 itemprop="name">Is OPC Skills free to use?</h3>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
           <p itemprop="text">Yes, OPC Skills is <strong>100% free and open source</strong> under the MIT license. Some individual skills may require API keys for third-party services (like Twitter API or Reddit API), but the skills themselves are free to install and use.</p>
+        </div>
+      </div>
+      <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <h3 itemprop="name">What are Claude Code skills?</h3>
+        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <p itemprop="text">Claude Code skills are extensions that add new capabilities to Claude Code, like <strong>domain search</strong>, <strong>Twitter analysis</strong>, and <strong>Reddit research</strong>. They're open source and install with one click. Each skill extends Claude Code with specialized functions for developers.</p>
+        </div>
+      </div>
+      <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <h3 itemprop="name">How do I install Claude Code extensions?</h3>
+        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <p itemprop="text">Copy the skill URL from OPC Skills, open Claude Code settings, paste into 'Add Skill', and click install. Each skill takes <strong>less than 30 seconds</strong> to set up. Or use the one-click command: <code>curl -fsSL opc.dev/install.sh | bash -s -- -t claude [skill-name]</code></p>
+        </div>
+      </div>
+      <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <h3 itemprop="name">Are these skills compatible with Cursor AI?</h3>
+        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <p itemprop="text">Yes! Most OPC Skills work with <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Codex</strong>, and other AI coding assistants that support the MCP (Model Context Protocol) standard. Simply change the <code>-t</code> parameter: <code>-t cursor</code> for Cursor AI, <code>-t codex</code> for Codex.</p>
         </div>
       </div>
       <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
