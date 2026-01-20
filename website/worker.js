@@ -38,11 +38,12 @@ export default {
     if (url.pathname === '/robots.txt') {
       return new Response(`# OPC Skills - AI Agent Skills
 # We explicitly allow AI bots for GEO (Generative Engine Optimization)
+# Content-Signal: search=yes, ai-input=yes, ai-train=no
 
 User-agent: *
 Allow: /
 
-# AI Search Engines - Allowed
+# AI Search Engines - Explicitly Allowed for GEO
 User-agent: GPTBot
 Allow: /
 
@@ -73,7 +74,20 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain' } });
+# Bad Bots - Blocked
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+Sitemap: https://opc.dev/sitemap.xml`, { 
+        headers: { 
+          'Content-Type': 'text/plain',
+          'X-Robots-Tag': 'all',
+          'Cache-Control': 'public, max-age=86400'
+        } 
+      });
     }
 
     // Serve skill images from GitHub
@@ -159,7 +173,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       "name": "What is OPC Skills?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "OPC Skills is a curated collection of AI agent skills for solopreneurs, indie hackers, and one-person companies. These skills extend AI coding assistants like Claude Code, Factory Droid, Cursor, OpenCode, and Codex with capabilities like domain hunting, social media research, and product analytics. 100% open source with one-click install for all major platforms."
+        "text": `OPC Skills is a curated collection of ${skills.length} AI agent skills for solopreneurs, indie hackers, and one-person companies. According to the Agent Skills standard (agentskills.io), these modular extensions work with 5 major AI coding platforms: Claude Code, Factory Droid, Cursor, OpenCode, and Codex. Each skill adds specialized capabilities like domain hunting, social media research, and product analytics. 100% free and open source under MIT license with installation taking less than 30 seconds.`
       }
     });
     faqItems.push({
@@ -175,7 +189,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       "name": "What are AI agent skills?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "AI agent skills are modular capabilities that extend AI coding assistants like Claude Code, Cursor, and Codex. They enable AI agents to perform specialized tasks such as searching domains, researching social media, hunting for promo codes, and analyzing product launches. Skills are installed via simple commands and work across multiple AI platforms."
+        "text": "AI agent skills are modular capabilities that extend AI coding assistants like Claude Code, Cursor, and Codex. According to agentskills.io, skills are self-contained folders with instructions (SKILL.md) that enable AI agents to perform specialized tasks such as searching domains, researching social media, and analyzing product launches. Skills typically take less than 30 seconds to install via one-line commands and work across 5+ major AI coding platforms."
       }
     });
     faqItems.push({
@@ -191,7 +205,7 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       "name": "What platforms are supported by OPC Skills?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "OPC Skills supports 5 major AI coding platforms: Claude Code (Anthropic), Factory Droid, Cursor, OpenCode, and Codex (OpenAI). Each skill can be installed with a single command for any of these platforms."
+        "text": `OPC Skills supports 5 major AI coding platforms: Claude Code (by Anthropic), Factory Droid, Cursor, OpenCode, and Codex (by OpenAI). All ${skills.length} skills can be installed with a single one-line command for any of these platforms, with installation completing in less than 30 seconds. Skills follow the Agent Skills standard (agentskills.io) for cross-platform compatibility.`
       }
     });
     faqItems.push({
@@ -579,12 +593,13 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
   <section class="hero" role="banner">
     <img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-banner.png" alt="OPC Skills - AI Agent Skills for Solopreneurs and Indie Hackers" class="hero-banner" fetchpriority="high" decoding="async">
     <h1>Claude Code Skills for<br>Solopreneurs</h1>
-    <p class="subtitle">AI extensions for <strong>one-person companies</strong> and <strong>indie hackers</strong>. Add Twitter search, Reddit analysis, domain finder, and SEO tools to Claude Code. <strong>10+</strong> skills, one-click install.</p>
+    <p class="subtitle">AI extensions for <strong>one-person companies</strong> and <strong>indie hackers</strong>. Add Twitter search, Reddit analysis, domain finder, and SEO tools to Claude Code, Cursor, and 3 more platforms. <strong>${skills.length} curated skills</strong> used by developers worldwide.</p>
     <div class="stats-bar">
-      <span><strong>${skills.length}+</strong> Skills</span>
+      <span><strong>${skills.length}</strong> Skills</span>
       <span><strong>5</strong> Platforms</span>
-      <span>One-Click Install</span>
-      <span>100% Open Source</span>
+      <span><strong>&lt;30 sec</strong> Setup</span>
+      <span><strong>100%</strong> Free & Open Source</span>
+      <span><strong>MIT</strong> License</span>
     </div>
     <div class="hero-install">
       <div class="hero-tabs hero-level-tabs">
@@ -616,13 +631,13 @@ Sitemap: https://opc.dev/sitemap.xml`, { headers: { 'Content-Type': 'text/plain'
       <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
         <h3 itemprop="name">What is OPC Skills?</h3>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <p itemprop="text">OPC Skills is a curated collection of AI agent skills for <strong>solopreneurs</strong>, <strong>indie hackers</strong>, and <strong>one-person companies</strong>. These skills extend AI coding assistants like Claude Code, Cursor, and Codex with automation capabilities like domain hunting, social media research, and product analytics.</p>
+          <p itemprop="text">OPC Skills is a curated collection of <strong>${skills.length} AI agent skills</strong> for <strong>solopreneurs</strong>, <strong>indie hackers</strong>, and <strong>one-person companies</strong>. These skills extend AI coding assistants like Claude Code, Cursor, and Codex with automation capabilities like domain hunting, social media research, and product analytics. According to the <a href="https://agentskills.io" target="_blank" rel="noopener">Agent Skills standard</a>, skills are modular instructions that help AI agents perform specialized tasks efficiently.</p>
         </div>
       </div>
       <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
         <h3 itemprop="name">What are AI agent skills?</h3>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <p itemprop="text">AI agent skills are modular capabilities that extend AI coding assistants. They enable AI agents to perform specialized tasks such as searching domains, researching social media, hunting for promo codes, and analyzing product launches. Skills are installed via simple commands and work across multiple platforms.</p>
+          <p itemprop="text">AI agent skills are modular capabilities that extend AI coding assistants like Claude Code, Cursor, and Codex. According to <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a>, skills enable AI agents to perform specialized tasks such as searching domains, researching social media, hunting for promo codes, and analyzing product launches. Each skill typically includes instructions, scripts, and resources in a self-contained folder with a SKILL.md file. Skills are installed via simple one-line commands and work across <strong>5+ major AI coding platforms</strong>.</p>
         </div>
       </div>
       <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
