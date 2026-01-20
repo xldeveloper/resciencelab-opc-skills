@@ -17,10 +17,11 @@ def main():
     data = [{
         "target": args.domain,
         "location_code": args.location,
-        "language_code": "en"
+        "language_code": "en",
+        "limit": 1  # We only need overview metrics
     }]
     
-    response = api_post("dataforseo_labs/google/domain_metrics_by_categories/live", data)
+    response = api_post("dataforseo_labs/google/ranked_keywords/live", data)
     results = get_result(response)
     
     print(f"domain: {args.domain}")
@@ -28,12 +29,13 @@ def main():
     
     if results:
         for result in results:
-            metrics = result.get("metrics", {}).get("organic", {})
-            print(f"organic_traffic: {format_count(metrics.get('etv'))}")
-            print(f"keywords: {format_count(metrics.get('count'))}")
-            pos_1 = metrics.get("pos_1", 0)
-            pos_2_3 = metrics.get("pos_2_3", 0)
-            print(f"top_3_positions: {pos_1 + pos_2_3}")
+            metrics = result.get("metrics", {})
+            if not metrics:
+                continue
+            organic = metrics.get("organic", {})
+            print(f"organic_keywords: {format_count(organic.get('count', 0))}")
+            print(f"organic_traffic: {format_count(organic.get('etv', 0))}")
+            print(f"top_3_positions: {organic.get('pos_1', 0) + organic.get('pos_2_3', 0)}")
     else:
         print("No results found")
 

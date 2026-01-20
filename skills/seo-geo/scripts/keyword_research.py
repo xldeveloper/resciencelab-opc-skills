@@ -16,13 +16,13 @@ def main():
     args = parser.parse_args()
 
     data = [{
-        "keyword": args.keyword,
+        "keywords": [args.keyword],  # API requires 'keywords' array (up to 20)
         "location_code": args.location,
         "language_code": "en",
         "limit": args.limit
     }]
     
-    response = api_post("keywords_data/google/keywords_for_keywords/live", data)
+    response = api_post("keywords_data/google_ads/keywords_for_keywords/live", data)
     results = get_result(response)
     
     print(f"keyword: {args.keyword}")
