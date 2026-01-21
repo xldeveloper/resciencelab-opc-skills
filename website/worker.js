@@ -7,6 +7,8 @@ export default {
     if (url.pathname === '/sitemap.xml') {
       const config = await fetchSkillsConfig(ctx);
       const skills = config.skills || [];
+      const blogConfig = await fetchBlogConfig(ctx);
+      const posts = blogConfig.posts || [];
       const today = new Date().toISOString().split('T')[0];
       
       const skillUrls = skills.map(s => `
@@ -15,6 +17,14 @@ export default {
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>`).join('');
+      
+      const blogUrls = posts.map(post => `
+  <url>
+    <loc>https://opc.dev/blog/${post.slug}</loc>
+    <lastmod>${post.date}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>`).join('');
       
       const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -26,11 +36,23 @@ export default {
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://opc.dev/compare</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opc.dev/blog</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://opc.dev/skills.json</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-  </url>${skillUrls}
+  </url>${skillUrls}${blogUrls}
 </urlset>`;
       return new Response(sitemap, { headers: { 'Content-Type': 'application/xml' } });
     }
@@ -182,6 +204,17 @@ Agent Skills Standard: https://agentskills.io
     // Comparison page - AI loves comparison tables (+25% citation rate)
     if (url.pathname === '/compare') {
       return renderComparePage(ctx);
+    }
+
+    // Blog list page
+    if (url.pathname === '/blog') {
+      return renderBlogListPage(ctx);
+    }
+
+    // Individual blog post
+    const blogMatch = url.pathname.match(/^\/blog\/([a-z0-9-]+)$/);
+    if (blogMatch) {
+      return renderBlogPost(blogMatch[1], ctx);
     }
 
     // Serve individual skill pages
@@ -849,6 +882,7 @@ Agent Skills Standard: https://agentskills.io
         <span class="logo-text">OPC Skills</span>
       </a>
       <nav>
+        <a href="/blog">Blog</a>
         <a href="https://github.com/ReScienceLab/opc-skills" target="_blank" rel="noopener noreferrer" class="github-btn">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           GitHub
@@ -1329,6 +1363,40 @@ function getFallbackConfig() {
   };
 }
 
+// Fetch blog config from GitHub with caching
+async function fetchBlogConfig(ctx) {
+  const BLOG_JSON_URL = 'https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/blog/blog.json';
+  const cache = caches.default;
+  const cacheUrl = new URL('https://opc.dev/_cache/blog-v1.json');
+  
+  let response = await cache.match(cacheUrl);
+  if (response) {
+    return await response.json();
+  }
+
+  try {
+    const res = await fetch(BLOG_JSON_URL, {
+      headers: { 'User-Agent': 'OPC-Skills-Website' }
+    });
+    
+    if (res.ok) {
+      const config = await res.json();
+      const cacheResponse = new Response(JSON.stringify(config), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=300' // 5 min cache
+        }
+      });
+      ctx.waitUntil(cache.put(cacheUrl, cacheResponse));
+      return config;
+    }
+  } catch (e) {
+    console.error('Error fetching blog.json:', e);
+  }
+
+  return { posts: [] };
+}
+
 // Markdown to HTML converter using marked
 function markdownToHtml(md) {
   if (!md) return '';
@@ -1575,6 +1643,7 @@ async function renderSkillPage(skillName, ctx) {
         <span class="logo-text">OPC Skills</span>
       </a>
       <nav>
+        <a href="/blog">Blog</a>
         <a href="https://github.com/ReScienceLab/opc-skills" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="mailto:hi@opc.dev">Contact</a>
       </nav>
@@ -1820,5 +1889,536 @@ async function renderComparePage(ctx) {
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Cache-Control': 'public, max-age=3600' }
+  });
+}
+
+// Render blog list page
+async function renderBlogListPage(ctx) {
+  const blogConfig = await fetchBlogConfig(ctx);
+  const posts = blogConfig.posts || [];
+  
+  const postCards = posts.map(post => `
+    <article class="blog-card">
+      <div class="blog-meta">
+        <time datetime="${post.date}">${new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+        <span class="blog-category">${post.category}</span>
+      </div>
+      <h2><a href="/blog/${post.slug}">${post.title}</a></h2>
+      <p class="blog-description">${post.description}</p>
+      <div class="blog-footer">
+        <span class="read-time">⏱ ${post.readTime}</span>
+        <div class="blog-tags">
+          ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+        </div>
+      </div>
+      <a href="/blog/${post.slug}" class="read-more">Read Article →</a>
+    </article>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog | OPC Skills - AI Automation Guides for Solopreneurs</title>
+  <meta name="description" content="Learn how to automate solopreneur workflows with AI agent skills. Guides, tutorials, and case studies for one-person companies.">
+  <meta name="keywords" content="AI automation, solopreneur blog, AI agent skills, indie hacker guides, one-person company">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Blog | OPC Skills - AI Automation Guides">
+  <meta property="og:description" content="Learn how to automate solopreneur workflows with AI agent skills.">
+  <meta property="og:url" content="https://opc.dev/blog">
+  <meta property="og:image" content="https://opc.dev/opc-banner.png">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Blog | OPC Skills">
+  <meta name="twitter:description" content="Learn how to automate solopreneur workflows with AI agent skills.">
+  <meta name="twitter:image" content="https://opc.dev/opc-banner.png">
+  
+  <link rel="canonical" href="https://opc.dev/blog">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --font: 'JetBrains Mono', monospace;
+      --font-pixel: 'Press Start 2P', cursive;
+      --black: #000;
+      --white: #fff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+    }
+    body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.5; }
+    
+    .page-header { border-bottom: 1px solid var(--black); padding: 48px 24px; text-align: center; background: var(--white); }
+    .page-header h1 { font-family: var(--font-pixel); font-size: 16px; font-weight: 400; margin-bottom: 12px; }
+    .page-header p { font-size: 12px; color: var(--gray-600); }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--gray-600);
+      text-decoration: none;
+      margin-bottom: 32px;
+    }
+    .back-link:hover { color: var(--black); text-decoration: underline; }
+    
+    .blog-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .blog-card {
+      background: var(--white);
+      border: 1px solid var(--black);
+      padding: 24px;
+      transition: box-shadow 0.2s;
+    }
+    .blog-card:hover {
+      box-shadow: 4px 4px 0 var(--black);
+    }
+    .blog-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .blog-category {
+      border: 1px solid var(--black);
+      padding: 3px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .blog-card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .blog-card h2 a {
+      color: var(--black);
+      text-decoration: none;
+    }
+    .blog-card h2 a:hover { text-decoration: underline; }
+    .blog-description {
+      color: var(--gray-600);
+      font-size: 12px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .blog-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--gray-200);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .read-time { font-size: 10px; color: var(--gray-600); }
+    .blog-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      padding: 3px 8px;
+      font-size: 9px;
+      color: var(--gray-600);
+    }
+    .read-more {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--gray-600);
+      text-decoration: none;
+    }
+    .read-more:hover { color: var(--black); text-decoration: underline; }
+    
+    @media (max-width: 768px) {
+      .page-header { padding: 32px 16px; }
+      .page-header h1 { font-size: 12px; }
+      .page-header p { font-size: 11px; }
+      .container { padding: 32px 16px; }
+      .blog-card { padding: 16px; }
+    }
+  </style>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "OPC Skills Blog",
+    "description": "AI automation guides, tutorials, and case studies for solopreneurs and indie hackers",
+    "url": "https://opc.dev/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "OPC Skills",
+      "url": "https://opc.dev"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="page-header">
+    <h1>BLOG</h1>
+    <p>AI Automation Guides for Solopreneurs & Indie Hackers</p>
+  </div>
+  
+  <div class="container">
+    <a href="/" class="back-link">← Back to Home</a>
+    
+    <div class="blog-grid">
+      ${postCards}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Cache-Control': 'public, max-age=1800' }
+  });
+}
+
+// Render individual blog post
+async function renderBlogPost(slug, ctx) {
+  const blogConfig = await fetchBlogConfig(ctx);
+  const post = blogConfig.posts.find(p => p.slug === slug);
+  
+  if (!post) {
+    return new Response('Blog post not found', { status: 404 });
+  }
+
+  // Fetch markdown content from GitHub
+  const MD_URL = `https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/blog/posts/${slug}.md`;
+  let markdown = '';
+  
+  try {
+    const mdRes = await fetch(MD_URL, {
+      headers: { 'User-Agent': 'OPC-Skills-Website' }
+    });
+    if (mdRes.ok) {
+      markdown = await mdRes.text();
+    }
+  } catch (e) {
+    console.error('Error fetching markdown:', e);
+  }
+
+  const content = markdownToHtml(markdown);
+  
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${post.title} | OPC Skills Blog</title>
+  <meta name="description" content="${post.description}">
+  <meta name="keywords" content="${post.keywords.join(', ')}">
+  <meta name="author" content="${post.author}">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="${post.title}">
+  <meta property="og:description" content="${post.description}">
+  <meta property="og:url" content="https://opc.dev/blog/${slug}">
+  <meta property="og:image" content="${post.image}">
+  <meta property="article:published_time" content="${post.date}T08:00:00Z">
+  <meta property="article:author" content="${post.author}">
+  <meta property="article:section" content="${post.category}">
+  ${post.tags.map(tag => `<meta property="article:tag" content="${tag}">`).join('\n  ')}
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${post.title}">
+  <meta name="twitter:description" content="${post.description}">
+  <meta name="twitter:image" content="${post.image}">
+  
+  <link rel="canonical" href="https://opc.dev/blog/${slug}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --font: 'JetBrains Mono', monospace;
+      --font-pixel: 'Press Start 2P', cursive;
+      --black: #000;
+      --white: #fff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+    }
+    body { font-family: var(--font); background: var(--gray-50); color: var(--black); line-height: 1.6; }
+    
+    .page-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--black);
+      padding: 24px;
+    }
+    .breadcrumb {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 11px;
+    }
+    .breadcrumb a {
+      color: var(--gray-600);
+      text-decoration: none;
+    }
+    .breadcrumb a:hover { color: var(--black); text-decoration: underline; }
+    .breadcrumb span { color: var(--gray-400); margin: 0 8px; }
+    
+    article {
+      max-width: 800px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+    .article-header {
+      background: var(--white);
+      border: 1px solid var(--black);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .article-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      color: var(--black);
+    }
+    .article-meta {
+      display: flex;
+      gap: 12px;
+      color: var(--gray-600);
+      font-size: 10px;
+      flex-wrap: wrap;
+    }
+    .article-meta span { display: flex; align-items: center; gap: 4px; }
+    .category-badge {
+      border: 1px solid var(--black);
+      padding: 3px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .article-content {
+      background: var(--white);
+      border: 1px solid var(--black);
+      padding: 32px;
+    }
+    .article-content h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+    .article-content h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      color: var(--black);
+    }
+    .article-content p {
+      font-size: 13px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .article-content ul, .article-content ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .article-content li { margin-bottom: 6px; }
+    .article-content blockquote {
+      border-left: 2px solid var(--black);
+      padding-left: 16px;
+      margin: 24px 0;
+      color: var(--gray-600);
+      font-style: italic;
+      font-size: 12px;
+    }
+    .article-content code {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      padding: 2px 6px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .article-content pre {
+      background: var(--black);
+      color: var(--white);
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid var(--black);
+    }
+    .article-content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: inherit;
+      font-size: 11px;
+    }
+    .article-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 12px;
+    }
+    .article-content th, .article-content td {
+      border: 1px solid var(--gray-200);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .article-content th {
+      background: var(--gray-100);
+      font-weight: 700;
+    }
+    .article-content img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--gray-200);
+      margin: 16px 0;
+    }
+    .article-content strong { color: var(--black); font-weight: 700; }
+    .article-footer {
+      background: var(--white);
+      border: 1px solid var(--black);
+      padding: 24px 32px;
+      margin-top: 24px;
+    }
+    .article-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .tag {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      padding: 4px 10px;
+      font-size: 10px;
+      color: var(--gray-600);
+    }
+    .back-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .back-link {
+      color: var(--gray-600);
+      text-decoration: none;
+      font-size: 11px;
+    }
+    .back-link:hover { color: var(--black); text-decoration: underline; }
+    
+    @media (max-width: 768px) {
+      .page-header { padding: 16px; }
+      .article { padding: 0 16px; margin: 32px auto; }
+      .article-header { padding: 24px; }
+      .article-header h1 { font-size: 16px; }
+      .article-content { padding: 24px; }
+      .article-footer { padding: 24px; }
+    }
+  </style>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "${post.title}",
+    "description": "${post.description}",
+    "image": "${post.image}",
+    "datePublished": "${post.date}T08:00:00Z",
+    "dateModified": "${post.date}T08:00:00Z",
+    "author": {
+      "@type": "Organization",
+      "name": "${post.author}",
+      "url": "https://opc.dev"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "OPC Skills",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://opc.dev/opc-banner.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://opc.dev/blog/${slug}"
+    },
+    "keywords": ${JSON.stringify(post.keywords)},
+    "articleSection": "${post.category}",
+    "inLanguage": "en-US"
+  }
+  </script>
+</head>
+<body>
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span>›</span>
+      <a href="/blog">Blog</a>
+      <span>›</span>
+      <span>${post.title}</span>
+    </div>
+  </div>
+  
+  <article>
+    <header class="article-header">
+      <h1>${post.title}</h1>
+      <div class="article-meta">
+        <span class="category-badge">${post.category}</span>
+        <span>📅 ${new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        <span>✍️ ${post.author}</span>
+        <span>⏱️ ${post.readTime}</span>
+      </div>
+    </header>
+    
+    <div class="article-content">
+      ${content}
+    </div>
+    
+    <footer class="article-footer">
+      <div class="article-tags">
+        ${post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+      </div>
+      <div class="back-links">
+        <a href="/blog" class="back-link">← All Blog Posts</a>
+        <a href="/" class="back-link">← Browse Skills</a>
+      </div>
+    </footer>
+  </article>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Cache-Control': 'public, max-age=1800' }
   });
 }

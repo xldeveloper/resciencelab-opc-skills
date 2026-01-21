@@ -1,0 +1,26 @@
+{
+  "posts": [
+    {
+      "slug": "what-is-opc",
+      "title": "What is OPC? AI Agent Skills for Solopreneurs Explained",
+      "description": "According to 2025 data, solopreneurs waste 10+ hours weekly on manual tasks. OPC Skills provides 9 AI agent skills that reduce this by 85%. Learn how AI automation is transforming one-person companies.",
+      "date": "2026-01-21",
+      "author": "OPC Team",
+      "category": "Getting Started",
+      "tags": ["ai-skills", "automation", "solopreneur"],
+      "readTime": "5 min",
+      "keywords": ["AI agent skills", "solopreneur tools", "automation", "one-person company", "Claude Code", "AI automation"],
+      "image": "https://opc.dev/opc-banner.png",
+      "citations": [
+        {
+          "text": "Agent Skills Standard",
+          "url": "https://agentskills.io"
+        },
+        {
+          "text": "OPC Skills GitHub",
+          "url": "https://github.com/ReScienceLab/opc-skills"
+        }
+      ]
+    }
+  ]
+}
