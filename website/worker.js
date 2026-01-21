@@ -402,8 +402,7 @@ Sitemap: https://opc.dev/sitemap.xml`, {
     .hero-banner { max-width: 560px; width: 100%; height: auto; margin: 0 auto 24px; border-radius: 8px; display: block; }
     .badge { display: inline-block; border: 1px solid var(--black); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
     h1 { font-family: var(--font-pixel); font-size: 20px; font-weight: 400; margin-bottom: 16px; letter-spacing: 0; line-height: 1.6; }
-    .subtitle { font-size: 14px; color: var(--gray-600); max-width: 520px; margin: 0 auto 20px; }
-    .subtitle strong { color: var(--black); }
+    .compatibility-note { font-size: 13px; color: var(--gray-600); margin: 0 auto 16px; max-width: 600px; }
     .stats-bar { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; font-size: 12px; color: var(--gray-600); }
     .stats-bar span { display: flex; align-items: center; gap: 4px; }
     .stats-bar strong { color: var(--black); font-weight: 700; }
@@ -568,15 +567,14 @@ Sitemap: https://opc.dev/sitemap.xml`, {
   <section class="hero" aria-label="Quick install instructions">
     <img src="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/opc-banner.png" alt="OPC Skills - AI Agent Skills for Solopreneurs" class="hero-banner" fetchpriority="high" decoding="async">
     <h1>AI Agent Skills for Solopreneurs</h1>
-    <p class="subtitle">Extend Claude Code, Cursor, Droid, and more with automation skills</p>
-    <div class="hero-badges">
+    <p class="compatibility-note">Works with Claude Code, Cursor, Windsurf, Droid, and 12+ other AI tools</p>
+    <div class="stats-bar">
       <span><strong>${skills.length}</strong> Skills Available</span>
       <span><strong>16+</strong> AI Tools Supported</span>
       <span><strong>100%</strong> Free & Open Source</span>
       <span><strong>MIT</strong> License</span>
     </div>
     <div class="hero-install">
-      <p style="font-size:13px;margin-bottom:12px;color:var(--gray-700);">Works with Claude Code, Cursor, Windsurf, Droid, and 12+ other AI tools</p>
       <div class="hero-cmd">
         <code id="hero-cmd-code" data-cmd="npx skills add ReScienceLab/opc-skills">npx skills add ReScienceLab/opc-skills</code>
         <button class="copy-btn" onclick="copyHeroCmd(this)">Copy</button>
