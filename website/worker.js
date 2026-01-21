@@ -324,13 +324,12 @@ Sitemap: https://opc.dev/sitemap.xml`, {
           <div class="skill-triggers">${s.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
           <div class="install-section">
             <div class="install-cmd">
-              <code class="cmd-display">npx skills add ReScienceLab/opc-skills --skill ${s.name}</code>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${s.name}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1000); })">Copy</button>
+              <code class="cmd-display">npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}</code>
+              <button class="copy-btn" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1000); })">Copy</button>
             </div>
             ${s.dependencies && s.dependencies.length > 0 ? `
             <div class="platform-note" style="background:#fff3cd;border-left:3px solid #ffc107;padding:8px;margin-top:8px;font-size:11px;color:#856404;">
-              <strong>Note:</strong> Install with dependencies:<br>
-              <code style="font-size:10px;display:block;margin-top:4px;">npx skills add ReScienceLab/opc-skills --skill ${s.dependencies.concat(s.name).join(' --skill ')}</code>
+              <strong>Note:</strong> This skill requires ${s.dependencies.map(d => `<code>${d}</code>`).join(', ')}
             </div>` : ''}
           </div>
           <details class="commands-section">
