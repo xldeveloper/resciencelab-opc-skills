@@ -29,14 +29,17 @@ Thumbs.db
 node_modules/
 .wrangler/
 
-# Claude
+# AI Coding
+.agent/
+.agents/
+.codex/
+.gemini/
+.goose/
+.opencode/
 .claude/
-
-# Factory
 .factory/
-
-# Cursor
 .cursor/
+.github/skills
 
 # Archives
 .skill-archive/

@@ -255,7 +255,7 @@ Sitemap: https://opc.dev/sitemap.xml`, {
           "inLanguage": "en-US",
           "speakable": {
             "@type": "SpeakableSpecification",
-            "cssSelector": [".subtitle", "h1", ".skill-desc", ".stats-bar"]
+            "cssSelector": ["h1", ".skill-desc", ".stats-bar", ".compatibility-note"]
           },
           "mainEntity": { "@id": "https://opc.dev/#skillcollection" }
         },
