@@ -327,10 +327,6 @@ Sitemap: https://opc.dev/sitemap.xml`, {
               <code class="cmd-display">npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}</code>
               <button class="copy-btn" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1000); })">Copy</button>
             </div>
-            ${s.dependencies && s.dependencies.length > 0 ? `
-            <div class="platform-note" style="background:#fff3cd;border-left:3px solid #ffc107;padding:8px;margin-top:8px;font-size:11px;color:#856404;">
-              <strong>Note:</strong> This skill requires ${s.dependencies.map(d => `<code>${d}</code>`).join(', ')}
-            </div>` : ''}
           </div>
           <details class="commands-section">
             <summary>Example Commands</summary>
@@ -1152,7 +1148,10 @@ async function renderSkillPage(skillName, ctx) {
     .skill-hero .auth-tag { font-size: 11px; padding: 4px 10px; margin-left: 12px; }
     .auth-tag.free { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
     .auth-tag.paid { background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; }
-    .skill-desc { font-size: 14px; color: var(--gray-600); margin-bottom: 24px; }
+    .skill-desc { font-size: 14px; color: var(--gray-600); margin-bottom: 16px; }
+    .skill-deps { font-size: 10px; color: var(--gray-600); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .skill-deps svg { flex-shrink: 0; }
+    .dep-tag { font-size: 9px; padding: 2px 6px; background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; margin-left: 4px; }
     .skill-triggers { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
     .trigger { font-size: 10px; padding: 4px 10px; background: var(--gray-100); border: 1px solid var(--gray-200); }
     .skill-content { margin-bottom: 32px; }
@@ -1225,20 +1224,17 @@ async function renderSkillPage(skillName, ctx) {
       </div>
     </article>
     <p class="skill-desc" itemprop="description">${skill.description}</p>
+    ${skill.dependencies && skill.dependencies.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${skill.dependencies.map(d => `<a href="/skills/${d}" class="dep-tag" style="text-decoration:none;">${d}</a>`).join('')}</div>` : ''}
     <div class="skill-triggers">${skill.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
-    ${skill.dependencies && skill.dependencies.length > 0 ? `<p style="font-size:12px;color:var(--gray-600);margin-bottom:16px;">⚠️ Dependencies: ${skill.dependencies.map(d => `<a href="/skills/${d}">${d}</a>`).join(', ')}</p>` : ''}
     
-    <div class="install-section">
-      <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--gray-900);">Quick Install</h3>
-      <div class="install-box" style="background:var(--gray-50);border-radius:8px;padding:16px;margin-bottom:16px;">
-        <code class="install-cmd" style="font-size:13px;color:var(--gray-800);word-break:break-all;display:block;margin-bottom:12px;">npx skills add ReScienceLab/opc-skills --skill ${skillName}</code>
-        <button class="copy-btn" style="background:var(--purple);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${skillName}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Command', 1000); })">Copy Command</button>
+    <div class="install-section" style="margin-bottom:32px;">
+      <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;">Quick Install</h3>
+      <div class="install-box" style="background:#f9fafb;border:2px solid #000;padding:0;position:relative;overflow:hidden;">
+        <div style="display:flex;align-items:stretch;">
+          <code class="install-cmd" style="flex:1;font-size:12px;padding:14px 16px;background:#f9fafb;overflow-x:auto;white-space:nowrap;font-family:monospace;color:#000;line-height:1.5;">npx skills add ReScienceLab/opc-skills --skill ${skill.dependencies && skill.dependencies.length > 0 ? skill.dependencies.concat(skillName).join(' --skill ') : skillName}</code>
+          <button class="copy-btn" style="background:#000;color:#fff;border:none;border-left:2px solid #000;padding:12px 20px;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--font);white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${skill.dependencies && skill.dependencies.length > 0 ? skill.dependencies.concat(skillName).join(' --skill ') : skillName}').then(() => { const orig = this.textContent; this.textContent='✓ Copied!'; this.style.background='#22c55e'; setTimeout(() => { this.textContent=orig; this.style.background='#000'; }, 2000); })">Copy</button>
+        </div>
       </div>
-      ${skill.dependencies && skill.dependencies.length > 0 ? `
-      <div class="install-note" style="background:#fff3cd;border-left:3px solid #ffc107;padding:12px;border-radius:4px;font-size:12px;color:#856404;">
-        <strong>Note:</strong> This skill requires <code>${skill.dependencies.join(', ')}</code>. Install all together:<br>
-        <code style="margin-top:8px;display:block;">npx skills add ReScienceLab/opc-skills --skill ${skill.dependencies.concat(skillName).join(' --skill ')}</code>
-      </div>` : ''}
     </div>
     
     <div class="skill-tabs">
