@@ -568,10 +568,36 @@ Agent Skills Standard: https://agentskills.io
       return Object.keys(deps);
     };
 
+    // Helper to convert URLs in text to clickable links
+    // Helper to collect all API keys including from dependencies
+    const getAllKeys = (skill, allSkills) => {
+      const keys = [...(skill.auth?.keys || [])];
+      const deps = getDeps(skill.dependencies);
+      for (const depName of deps) {
+        const depSkill = allSkills.find(s => s.name === depName);
+        if (depSkill?.auth?.keys) {
+          for (const k of depSkill.auth.keys) {
+            if (!keys.some(existing => existing.env === k.env)) {
+              keys.push({ ...k, from: depName });
+            }
+          }
+        }
+      }
+      return keys;
+    };
+
+    // Helper to check if skill requires any API key (self or deps)
+    const requiresApiKey = (skill, allSkills) => {
+      const allKeys = getAllKeys(skill, allSkills);
+      return allKeys.some(k => !k.optional);
+    };
+
     // Generate skill cards with simplified npx install command
     const skillCards = skills.map(s => {
       const installs = installStats.skills?.[s.name] || 0;
       const deps = getDeps(s.dependencies);
+      const allKeys = getAllKeys(s, skills);
+      const needsKey = requiresApiKey(s, skills);
       return `
         <div class="skill-card" id="skill-${s.name}">
           <div class="skill-header">
@@ -582,7 +608,7 @@ Agent Skills Standard: https://agentskills.io
               <h3><a href="/skills/${s.name}" style="color:inherit;text-decoration:none;">${s.name}</a></h3>
               <span class="version">v${s.version}</span>${installs > 0 ? ` <span class="install-count">${installs} installs</span>` : ''}
             </div>
-            ${s.auth.required ? `<span class="auth-tag paid">API Key</span>` : `<span class="auth-tag free">Free</span>`}
+            ${needsKey ? `<span class="auth-tag paid">API Key</span>` : `<span class="auth-tag free">Free</span>`}
             ${s.links.example ? `<a href="${s.links.example}" target="_blank" rel="noopener noreferrer" class="example-link" title="View Example">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
             </a>` : ''}
@@ -591,6 +617,7 @@ Agent Skills Standard: https://agentskills.io
             </a>
           </div>
           <p class="skill-desc">${s.description}</p>
+          ${allKeys.length > 0 ? `<div class="skill-auth-info"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> ${allKeys.map(k => `<code>${k.env}</code> <a href="${k.url}" target="_blank" rel="noopener noreferrer">${k.url.replace('https://', '')}</a>${k.from ? ` <span class="from-dep">(${k.from})</span>` : ''}${k.optional ? ' <span class="optional">(optional)</span>' : ''}`).join('<br>')}</div>` : ''}
           ${deps.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${deps.map(d => `<span class="dep-tag">${d}</span>`).join('')}</div>` : ''}
           <div class="skill-triggers">${s.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
           <div class="install-section">
@@ -765,6 +792,12 @@ Agent Skills Standard: https://agentskills.io
     .github-link { color: var(--gray-400); padding: 4px; display: flex; align-items: center; }
     .github-link:hover { color: var(--black); }
     .skill-desc { font-size: 12px; color: var(--gray-600); margin-bottom: 12px; line-height: 1.6; }
+    .skill-auth-info { font-size: 11px; color: var(--gray-600); display: flex; align-items: flex-start; gap: 6px; margin-bottom: 10px; line-height: 1.6; }
+    .skill-auth-info svg { flex-shrink: 0; margin-top: 2px; }
+    .skill-auth-info code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+    .skill-auth-info a { color: #6366f1; text-decoration: none; font-size: 10px; }
+    .skill-auth-info a:hover { text-decoration: underline; }
+    .skill-auth-info .from-dep, .skill-auth-info .optional { color: #9ca3af; font-size: 9px; }
     .skill-deps { font-size: 10px; color: var(--gray-600); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
     .skill-deps svg { flex-shrink: 0; }
     .dep-tag { font-size: 9px; padding: 2px 6px; background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; margin-left: 4px; }
@@ -1473,6 +1506,28 @@ async function renderSkillPage(skillName, ctx) {
     ? (Array.isArray(skill.dependencies) ? skill.dependencies : Object.keys(skill.dependencies))
     : [];
 
+  // Helper to collect all API keys including from dependencies
+  const getAllKeys = (sk, allSkills) => {
+    const keys = [...(sk.auth?.keys || [])];
+    const deps = sk.dependencies 
+      ? (Array.isArray(sk.dependencies) ? sk.dependencies : Object.keys(sk.dependencies))
+      : [];
+    for (const depName of deps) {
+      const depSkill = allSkills.find(s => s.name === depName);
+      if (depSkill?.auth?.keys) {
+        for (const k of depSkill.auth.keys) {
+          if (!keys.some(existing => existing.env === k.env)) {
+            keys.push({ ...k, from: depName });
+          }
+        }
+      }
+    }
+    return keys;
+  };
+
+  const allKeys = getAllKeys(skill, config.skills);
+  const needsKey = allKeys.some(k => !k.optional);
+
   // Fetch SKILL.md from GitHub
   const mdUrl = `https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/skills/${skillName}/SKILL.md`;
   let markdown = '';
@@ -1709,10 +1764,11 @@ async function renderSkillPage(skillName, ctx) {
       <img src="${skill.logo || `https://cdn.simpleicons.org/${skill.icon}/${skill.color}`}" alt="${skill.name} logo" itemprop="image">
       <div>
         <h1 itemprop="name">${skill.name}<span class="version" itemprop="softwareVersion">v${skill.version}</span>${installs > 0 ? `<span class="install-count" style="font-size:12px;color:#6b7280;margin-left:12px;font-weight:400;">${installs} installs</span>` : ''}</h1>
-        ${skill.auth.required ? '<span class="auth-tag paid">API Key Required</span>' : '<span class="auth-tag free">Free</span>'}
+        ${needsKey ? '<span class="auth-tag paid">API Key Required</span>' : '<span class="auth-tag free">Free</span>'}
       </div>
     </article>
     <p class="skill-desc" itemprop="description">${skill.description}</p>
+    ${allKeys.length > 0 ? `<div class="skill-auth-info" style="margin:12px 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#6366f1" style="flex-shrink:0;margin-top:2px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg><div style="display:flex;flex-direction:column;gap:4px;">${allKeys.map(k => `<div><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:12px;">${k.env}</code> <a href="${k.url}" target="_blank" rel="noopener noreferrer" style="color:#6366f1;font-size:13px;">${k.url.replace('https://', '')}</a>${k.from ? ` <span style="color:#9ca3af;font-size:11px;">(from ${k.from})</span>` : ''}${k.optional ? ' <span style="color:#9ca3af;font-size:11px;">(optional)</span>' : ''}</div>`).join('')}</div></div>` : ''}
     ${skillDeps.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${skillDeps.map(d => `<a href="/skills/${d}" class="dep-tag" style="text-decoration:none;">${d}</a>`).join('')}</div>` : ''}
     <div class="skill-triggers">${skill.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
     
