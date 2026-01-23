@@ -2,6 +2,12 @@
 
 *By OPC Team | January 23, 2026 | 6 min read*
 
+## TL;DR
+
+Agent skills get **100x more engagement** than traditional documentation. Skills are structured markdown files that AI coding assistants (Claude Code, Cursor, Windsurf) can load and execute. In 2026, **6 major platforms** natively support skills, and Microsoft is testing Claude Code internally. The future of developer documentation is agent-native: docs that execute, not just inform.
+
+---
+
 ## The Engagement Gap Nobody Talks About
 
 Last week, [swyx](https://twitter.com/swyx/status/2014521220260364380) (founder of AI Engineer, Latent Space podcast) dropped a fascinating observation:
@@ -201,6 +207,34 @@ npx skills add ReScienceLab/opc-skills --skill logo-creator
 - [Mintlify's Skill.md Specification](https://www.mintlify.com/blog/skill-md)
 - [swyx's Tweet on Skills vs Docs Engagement](https://twitter.com/swyx/status/2014521220260364380)
 - [awesome-claude-code Repository](https://github.com/hesreallyhim/awesome-claude-code)
+
+---
+
+## Frequently Asked Questions
+
+### What is an agent skill?
+
+An agent skill is a structured markdown file with YAML frontmatter that AI coding assistants can load, understand, and execute. Unlike traditional docs that humans read, skills are designed for both humans and AI agents to consume and act upon.
+
+### Which AI platforms support skills?
+
+As of January 2026, **6 major platforms** natively support skills: Claude Code, Cursor, Windsurf, OpenCode, Codex (via adapters), and Droid (Factory). More platforms are adding support monthly.
+
+### How do skills differ from MCP (Model Context Protocol)?
+
+Skills are instruction sets that tell AI *what to do*. MCP provides tool integrations that give AI *capabilities*. They're complementary: a skill might use MCP tools to execute its instructions.
+
+### Can I convert my existing documentation to skills?
+
+Yes. Focus on actionable content like tutorials, API guides, and workflows. Add YAML frontmatter with name, description, and triggers. Structure content with clear headings and code blocks. See our [5-step conversion guide](#how-to-convert-your-docs-to-skills) above.
+
+### Are skills only for developers?
+
+No. Skills can automate any repeatable process: domain research, logo creation, SEO audits, social media research. OPC Skills includes 9 skills specifically designed for solopreneurs and non-technical users.
+
+### How do I measure skill adoption?
+
+[Skills.sh](https://skills.sh) shows installation counts per platform. You can also track GitHub stars, npm downloads, and usage analytics if you add telemetry to your scripts.
 
 ---
 

@@ -8,9 +8,41 @@
       "author": "OPC Team",
       "category": "Insights",
       "tags": ["agent-skills", "documentation", "ai-agents", "claude-code"],
-      "readTime": "6 min",
-      "keywords": ["agent skills", "AI documentation", "Claude Code skills", "Cursor skills", "skills.sh", "Mintlify", "agent-native docs"],
+      "readTime": "7 min",
+      "keywords": ["agent skills", "AI documentation", "Claude Code skills", "Cursor skills", "Windsurf skills", "skills.sh", "Mintlify Skill.md", "agent-native docs", "GEO optimization", "AI search visibility"],
       "image": "https://opc.dev/opc-banner.png",
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Why Skills Beat Docs: The Rise of Agent-Native Documentation",
+        "description": "Agent skills get 100x more engagement than traditional documentation. Learn why 6 major AI platforms now support skills and how to convert your docs.",
+        "author": {
+          "@type": "Organization",
+          "name": "OPC Team",
+          "url": "https://opc.dev"
+        },
+        "datePublished": "2026-01-23",
+        "publisher": {
+          "@type": "Organization",
+          "name": "OPC Skills",
+          "url": "https://opc.dev"
+        },
+        "mainEntityOfPage": "https://opc.dev/blog/why-skills-beat-docs"
+      },
+      "faq": [
+        {
+          "question": "What is an agent skill?",
+          "answer": "An agent skill is a structured markdown file with YAML frontmatter that AI coding assistants can load, understand, and execute."
+        },
+        {
+          "question": "Which AI platforms support skills?",
+          "answer": "As of January 2026, 6 major platforms natively support skills: Claude Code, Cursor, Windsurf, OpenCode, Codex (via adapters), and Droid (Factory)."
+        },
+        {
+          "question": "How do skills differ from MCP?",
+          "answer": "Skills are instruction sets that tell AI what to do. MCP provides tool integrations that give AI capabilities. They're complementary."
+        }
+      ],
       "citations": [
         {
           "text": "swyx on Skills vs Docs engagement",
