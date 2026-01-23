@@ -561,9 +561,17 @@ Agent Skills Standard: https://agentskills.io
       ]
     };
 
+    // Helper to get dependency names from object or array
+    const getDeps = (deps) => {
+      if (!deps) return [];
+      if (Array.isArray(deps)) return deps;
+      return Object.keys(deps);
+    };
+
     // Generate skill cards with simplified npx install command
     const skillCards = skills.map(s => {
       const installs = installStats.skills?.[s.name] || 0;
+      const deps = getDeps(s.dependencies);
       return `
         <div class="skill-card" id="skill-${s.name}">
           <div class="skill-header">
@@ -583,12 +591,12 @@ Agent Skills Standard: https://agentskills.io
             </a>
           </div>
           <p class="skill-desc">${s.description}</p>
-          ${s.dependencies && s.dependencies.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${s.dependencies.map(d => `<span class="dep-tag">${d}</span>`).join('')}</div>` : ''}
+          ${deps.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${deps.map(d => `<span class="dep-tag">${d}</span>`).join('')}</div>` : ''}
           <div class="skill-triggers">${s.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
           <div class="install-section">
             <div class="install-cmd">
-              <code class="cmd-display">npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}</code>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${s.dependencies && s.dependencies.length > 0 ? s.dependencies.concat(s.name).join(' --skill ') : s.name}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1000); })">Copy</button>
+              <code class="cmd-display">npx skills add ReScienceLab/opc-skills --skill ${deps.length > 0 ? deps.concat(s.name).join(' --skill ') : s.name}</code>
+              <button class="copy-btn" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${deps.length > 0 ? deps.concat(s.name).join(' --skill ') : s.name}').then(() => { this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1000); })">Copy</button>
             </div>
           </div>
           <details class="commands-section">
@@ -1459,6 +1467,11 @@ async function renderSkillPage(skillName, ctx) {
   }
   
   const installs = installStats.skills?.[skillName] || 0;
+  
+  // Get dependency names from object or array
+  const skillDeps = skill.dependencies 
+    ? (Array.isArray(skill.dependencies) ? skill.dependencies : Object.keys(skill.dependencies))
+    : [];
 
   // Fetch SKILL.md from GitHub
   const mdUrl = `https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/skills/${skillName}/SKILL.md`;
@@ -1700,15 +1713,15 @@ async function renderSkillPage(skillName, ctx) {
       </div>
     </article>
     <p class="skill-desc" itemprop="description">${skill.description}</p>
-    ${skill.dependencies && skill.dependencies.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${skill.dependencies.map(d => `<a href="/skills/${d}" class="dep-tag" style="text-decoration:none;">${d}</a>`).join('')}</div>` : ''}
+    ${skillDeps.length > 0 ? `<div class="skill-deps"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg> Depends on: ${skillDeps.map(d => `<a href="/skills/${d}" class="dep-tag" style="text-decoration:none;">${d}</a>`).join('')}</div>` : ''}
     <div class="skill-triggers">${skill.triggers.map(t => `<span class="trigger">${t}</span>`).join('')}</div>
     
     <div class="install-section" style="margin-bottom:32px;">
       <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;">Quick Install</h3>
       <div class="install-box" style="background:#f9fafb;border:2px solid #000;padding:0;position:relative;overflow:hidden;">
         <div style="display:flex;align-items:stretch;">
-          <code class="install-cmd" style="flex:1;font-size:12px;padding:14px 16px;background:#f9fafb;overflow-x:auto;white-space:nowrap;font-family:monospace;color:#000;line-height:1.5;">npx skills add ReScienceLab/opc-skills --skill ${skill.dependencies && skill.dependencies.length > 0 ? skill.dependencies.concat(skill.name).join(' --skill ') : skill.name}</code>
-          <button class="copy-btn" style="background:#000;color:#fff;border:none;border-left:2px solid #000;padding:12px 20px;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--font);white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${skill.dependencies && skill.dependencies.length > 0 ? skill.dependencies.concat(skill.name).join(' --skill ') : skill.name}').then(() => { const orig = this.textContent; this.textContent='✓ Copied!'; this.style.background='#22c55e'; setTimeout(() => { this.textContent=orig; this.style.background='#000'; }, 2000); })">Copy</button>
+          <code class="install-cmd" style="flex:1;font-size:12px;padding:14px 16px;background:#f9fafb;overflow-x:auto;white-space:nowrap;font-family:monospace;color:#000;line-height:1.5;">npx skills add ReScienceLab/opc-skills --skill ${skillDeps.length > 0 ? skillDeps.concat(skill.name).join(' --skill ') : skill.name}</code>
+          <button class="copy-btn" style="background:#000;color:#fff;border:none;border-left:2px solid #000;padding:12px 20px;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--font);white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'" onclick="navigator.clipboard.writeText('npx skills add ReScienceLab/opc-skills --skill ${skillDeps.length > 0 ? skillDeps.concat(skill.name).join(' --skill ') : skill.name}').then(() => { const orig = this.textContent; this.textContent='✓ Copied!'; this.style.background='#22c55e'; setTimeout(() => { this.textContent=orig; this.style.background='#000'; }, 2000); })">Copy</button>
         </div>
       </div>
     </div>
