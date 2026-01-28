@@ -464,7 +464,21 @@ Agent Skills Standard: https://agentskills.io
       "name": "How does seo-geo help with AI visibility?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "seo-geo implements Princeton's 9 GEO methods proven to increase AI search visibility by 40-70%. It audits your site, generates schema markup (FAQPage, ItemList), optimizes meta tags, and ensures AI bots (ChatGPT, Claude, Perplexity) can access your content. Includes citation tracking and keyword research."
+        "text": "seo-geo implements Princeton's 9 GEO methods proven to increase AI search visibility by 40-70%. It audits your site, generates schema markup (FAQPage, ItemList), optimizes meta tags, and ensures AI bots (ChatGPT, Claude, Perplexity) can access your content. Includes citation tracking and keyword research.",
+        "citation": [
+          {
+            "@type": "Citation",
+            "url": "https://arxiv.org/abs/2311.03735",
+            "name": "Princeton NLP: GEO Optimization Methods",
+            "datePublished": "2023-11-07"
+          },
+          {
+            "@type": "Citation",
+            "url": "https://agentskills.io",
+            "name": "Agent Skills Standard",
+            "datePublished": "2024-01-01"
+          }
+        ]
       }
     });
     
@@ -557,6 +571,37 @@ Agent Skills Standard: https://agentskills.io
           "@type": "FAQPage",
           "@id": "https://opc.dev/#faq",
           "mainEntity": faqItems
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://opc.dev/#installation",
+          "name": "How to Install OPC Skills",
+          "description": "Quick one-command installation for AI agent skills compatible with Claude Code, Cursor, Droid, and 12+ other AI tools",
+          "totalTime": "PT30S",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "position": 1,
+              "name": "Run installation command",
+              "text": "Open your terminal and run: npx skills add ReScienceLab/opc-skills",
+              "itemListElement": {
+                "@type": "HowToDirection",
+                "text": "npx skills add ReScienceLab/opc-skills"
+              }
+            },
+            {
+              "@type": "HowToStep",
+              "position": 2,
+              "name": "Wait for installation",
+              "text": "The CLI will automatically detect your installed AI tools (Claude, Cursor, Droid, etc.) and install skills in under 30 seconds"
+            },
+            {
+              "@type": "HowToStep",
+              "position": 3,
+              "name": "Start using skills",
+              "text": "Skills are now available in your AI coding assistant. Reference them in your conversations to trigger specialized capabilities"
+            }
+          ]
         }
       ]
     };
@@ -640,11 +685,11 @@ Agent Skills Standard: https://agentskills.io
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Code Skills for Solopreneurs | AI Tools for One-Person Companies</title>
+  <title>AI Agent Skills for Solopreneurs | Claude Code & Cursor</title>
   <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/apple-touch-icon.png">
-  <meta name="description" content="10+ Claude Code skills for solopreneurs and indie hackers. Add Twitter search, Reddit analysis, domain finder, and SEO tools. Built for one-person companies. One-click install. 100% open source.">
+  <meta name="description" content="9 AI agent skills for solopreneurs. Add Twitter search, Reddit analysis, domain finder & SEO tools to Claude/Cursor. One-click install. 100% free & open source.">
   <meta name="keywords" content="AI agent skills, solopreneur tools, indie hacker tools, Claude Code skills, Cursor skills, Codex skills, one-person company, solo developer, AI coding assistant, AI automation, vibe coding, agent skills, claude skills, Factory Droid, OpenCode, developer tools, AI agents">
   <meta name="robots" content="index, follow">
   <meta name="author" content="ReScience Lab">
@@ -1837,6 +1882,40 @@ async function renderComparePage(ctx) {
   <meta name="keywords" content="AI agent skills comparison, Claude Code extensions comparison, Cursor skills comparison, developer tools comparison">
   <link rel="icon" href="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/favicon.ico">
   <link rel="canonical" href="https://opc.dev/compare">
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="AI Agent Skills Comparison 2026 | OPC vs Alternatives">
+  <meta property="og:description" content="Feature-by-feature comparison of AI agent skill platforms. Compare OPC Skills with alternatives for Claude Code, Cursor, and Droid.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/og-image.png">
+  <meta property="og:url" content="https://opc.dev/compare">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OPC Skills">
+  <meta property="og:locale" content="en_US">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Agent Skills Comparison 2026">
+  <meta name="twitter:description" content="Compare OPC Skills with alternatives for Claude Code, Cursor, and Droid.">
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/og-image.png">
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AI Agent Skills Comparison 2026",
+    "description": "Feature-by-feature comparison of AI agent skill platforms for Claude Code, Cursor, and Droid",
+    "url": "https://opc.dev/compare",
+    "datePublished": "2024-01-01",
+    "dateModified": "${today}",
+    "inLanguage": "en-US",
+    "mainEntity": {
+      "@type": "Table",
+      "about": "Comparison of AI agent skill platforms including OPC Skills, manual tools, and paid alternatives"
+    },
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", ".intro", "table"]
+    }
+  }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2034,13 +2113,13 @@ async function renderBlogListPage(ctx) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog | OPC Skills - AI Automation Guides for Solopreneurs</title>
-  <meta name="description" content="Learn how to automate solopreneur workflows with AI agent skills. Guides, tutorials, and case studies for one-person companies.">
+  <meta name="description" content="AI automation guides for solopreneurs. Learn to build skills for Claude Code, Cursor & Droid. Tutorials, case studies & best practices for indie hackers.">
   <meta name="keywords" content="AI automation, solopreneur blog, AI agent skills, indie hacker guides, one-person company">
   
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Blog | OPC Skills - AI Automation Guides">
-  <meta property="og:description" content="Learn how to automate solopreneur workflows with AI agent skills.">
+  <meta property="og:description" content="AI automation guides for solopreneurs. Learn to build skills for Claude Code, Cursor & Droid.">
   <meta property="og:url" content="https://opc.dev/blog">
   <meta property="og:image" content="https://opc.dev/opc-banner.png">
   
