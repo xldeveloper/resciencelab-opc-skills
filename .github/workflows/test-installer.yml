@@ -35,7 +35,7 @@ jobs:
           cd test-workspace
           
           # Test installing specific skill
-          npx skills add ${{ github.repository }} --skill ${{ matrix.skill }} -a droid -y
+          npx skills add ${{ github.repository }} --skill ${{ matrix.skill }} -y
           
           # Verify installation
           if [ -d ".factory/skills/${{ matrix.skill }}" ]; then
@@ -68,7 +68,7 @@ jobs:
           cd test-workspace
           
           # Test installing all skills
-          npx skills add ${{ github.repository }} -a droid -y
+          npx skills add ${{ github.repository }} -y
           
           # Verify all skills are installed
           SKILL_COUNT=$(ls -1 .factory/skills/ | wc -l)
