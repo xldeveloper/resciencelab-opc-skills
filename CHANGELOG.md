@@ -63,6 +63,18 @@ Each skill maintains its own independent version. Use this matrix to understand 
 
 ## Released Versions
 
+## [1.0.5] - 2026-01-29
+
+### Infrastructure
+- **Fixed**: Removed `pluginRoot` and updated all source paths to work around Claude Code bug
+  - Removed `pluginRoot: "./skills"` from marketplace metadata (Claude Code doesn't respect this field)
+  - Updated all plugin source paths from `"./domain-hunter"` to `"./skills/domain-hunter"`
+  - Fixes "Source path does not exist" error when installing plugins
+  - Workaround for known Claude Code issues #11243 and #11278
+
+### Skills
+- (no skill version changes in this release)
+
 ## [1.0.4] - 2026-01-29
 
 ### Infrastructure
