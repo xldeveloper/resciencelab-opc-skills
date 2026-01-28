@@ -32,10 +32,7 @@ Each skill maintains its own independent version. Use this matrix to understand 
 ## [Unreleased]
 
 ### Website
-- **Added**: New blog post "Why Skills Beat Docs: The Rise of Agent-Native Documentation"
-  - Analysis of 100x engagement gap between docs and skills
-  - Comprehensive ecosystem overview (Skills.sh, Mintlify, awesome-claude-code)
-  - Step-by-step guide for converting docs to skills
+- (no changes)
 
 ### requesthunt
 - (no changes)
@@ -65,6 +62,17 @@ Each skill maintains its own independent version. Use this matrix to understand 
 - (no changes)
 
 ## Released Versions
+
+## [1.0.1] - 2026-01-29
+
+### Website
+- **Added**: New blog post "Why Skills Beat Docs: The Rise of Agent-Native Documentation"
+  - Analysis of 100x engagement gap between docs and skills
+  - Comprehensive ecosystem overview (Skills.sh, Mintlify, awesome-claude-code)
+  - Step-by-step guide for converting docs to skills
+
+### Skills
+- (no skill version changes in this release)
 
 ### requesthunt
 
