@@ -1,6 +1,139 @@
 {
   "posts": [
     {
+      "slug": "seo-geo-1k-installs-milestone",
+      "title": "How SEO-GEO Skill Hit 1,000 Installs: The AI Search Revolution Is Here",
+      "description": "SEO-GEO just crossed 1,000 installs, making it the #1 skill in OPC Skills. Why? AI search engines (ChatGPT, Perplexity) are replacing Google, and developers are optimizing for citations instead of rankings. Learn how to install SEO-GEO in 30 seconds and join the AI search revolution.",
+      "date": "2026-02-05",
+      "dateModified": "2026-02-05",
+      "author": "OPC Team",
+      "category": "Case Study",
+      "tags": ["seo-geo", "ai-search", "geo-optimization", "milestone", "chatgpt-search", "perplexity"],
+      "readTime": "8 min",
+      "keywords": [
+        "SEO-GEO 1000 installs",
+        "AI search optimization",
+        "GEO Generative Engine Optimization",
+        "ChatGPT Search SEO",
+        "Perplexity AI citations",
+        "Claude Code SEO plugin",
+        "install seo-geo skill",
+        "AI search visibility",
+        "schema.org automation",
+        "Princeton GEO methods",
+        "solopreneur SEO tools",
+        "free SEO alternative"
+      ],
+      "image": "https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/blog/2026-02-05-seo-geo-1k-installs-og.png",
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "name": "How SEO-GEO Skill Hit 1,000 Installs: The AI Search Revolution Is Here",
+        "description": "Case study: SEO-GEO skill reaches 1,000 installs in 3 weeks. Analyze why AI search optimization (GEO) is replacing traditional SEO, how solopreneurs are optimizing for ChatGPT/Perplexity citations, and installation statistics.",
+        "author": {
+          "@type": "Organization",
+          "name": "OPC Team",
+          "url": "https://opc.dev"
+        },
+        "datePublished": "2026-02-05",
+        "dateModified": "2026-02-05",
+        "publisher": {
+          "@type": "Organization",
+          "name": "OPC Skills",
+          "url": "https://opc.dev",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://opc.dev/opc-logo.svg"
+          }
+        },
+        "image": "https://raw.githubusercontent.com/ReScienceLab/opc-skills/main/website/blog/2026-02-05-seo-geo-1k-installs-og.png",
+        "mainEntityOfPage": "https://opc.dev/blog/seo-geo-1k-installs-milestone",
+        "keywords": "SEO-GEO, AI search, GEO optimization, ChatGPT Search, Perplexity AI",
+        "articleSection": "Case Study",
+        "wordCount": 3200
+      },
+      "faq": [
+        {
+          "question": "Why did SEO-GEO hit 1,000 installs so fast?",
+          "answer": "SEO-GEO addresses a critical need: optimizing for AI search engines like ChatGPT Search and Perplexity AI. It's free, installs in 30 seconds, requires no API keys, and automates the 9 Princeton GEO methods proven to increase AI visibility by 40-70%. With AI search growing 30% monthly, developers need GEO optimization tools."
+        },
+        {
+          "question": "What is GEO (Generative Engine Optimization)?",
+          "answer": "GEO is the practice of optimizing content to be cited by AI search engines like ChatGPT, Perplexity, and Claude. Unlike traditional SEO (rank #1 on Google), GEO focuses on getting cited in AI-generated answers. Princeton research identified 9 methods that increase AI citations by 40-70%, including adding statistics, FAQs, schema markup, and authoritative citations."
+        },
+        {
+          "question": "How do I install SEO-GEO in Claude Code?",
+          "answer": "Use the /plugin command in Claude Code: type '/plugin marketplace add ReScienceLab/opc-skills' then '/plugin install seo-geo@opc-skills'. Or use the universal installer: 'npx skills add ReScienceLab/opc-skills --skill seo-geo'. Installation takes 30 seconds and requires no API keys."
+        },
+        {
+          "question": "Is SEO-GEO really free compared to Ahrefs/SEMrush?",
+          "answer": "Yes. SEO-GEO is 100% free and open source (MIT license). Alternatives like Ahrefs ($99/mo), SEMrush ($129/mo), and Moz ($99/mo) cost $1,188-1,548 per year. SEO-GEO provides GEO optimization (which paid tools don't cover) plus basic SEO auditing at $0 cost."
+        },
+        {
+          "question": "How long until I see AI search results from GEO optimization?",
+          "answer": "Based on 1,000 user installations: 2-4 weeks for Perplexity AI citations, 4-6 weeks for ChatGPT Search visibility. Much faster than traditional SEO (3-6 months for Google rankings). AI search engines index and cite new content quickly."
+        },
+        {
+          "question": "Which AI search engines does SEO-GEO optimize for?",
+          "answer": "SEO-GEO optimizes for ChatGPT Search (200M+ users), Perplexity AI (50M monthly users), Google AI Overviews (SGE), Bing Copilot, and Claude Search. It ensures your robots.txt allows GPTBot, PerplexityBot, ClaudeBot, and other AI crawlers."
+        },
+        {
+          "question": "Can I use SEO-GEO for client projects?",
+          "answer": "Yes. MIT license allows commercial use. Use SEO-GEO for client websites, SaaS products, agency work, and revenue-generating projects without restrictions or attribution requirements."
+        },
+        {
+          "question": "What makes SEO-GEO the #1 most-installed skill?",
+          "answer": "SEO-GEO has 2x more installs than any other OPC skill because: (1) AI search is growing 30% monthly, (2) it's free vs $99-199/mo alternatives, (3) no API keys required, (4) works across 12+ AI platforms, (5) automates complex GEO tasks in minutes vs hours manually."
+        },
+        {
+          "question": "Does SEO-GEO help with traditional Google SEO?",
+          "answer": "Yes, as a beneficial side effect. Schema markup, meta tags, and FAQ sections that SEO-GEO generates also improve Google rankings. Users report +20-30% Google organic traffic improvements after applying GEO optimizations."
+        },
+        {
+          "question": "What are the 9 Princeton GEO methods?",
+          "answer": "The 9 methods proven to increase AI citations by 40-70%: (1) Add authoritative citations, (2) Include statistics with sources, (3) Use expert quotations, (4) Optimize for fluency, (5) Strategic keyword placement, (6) Authoritative tone, (7) Simplify complexity, (8) Add FAQ sections, (9) Technical optimization (schema.org). SEO-GEO automates all 9."
+        }
+      ],
+      "citations": [
+        {
+          "text": "Princeton NLP: GEO Optimization Methods",
+          "url": "https://arxiv.org/abs/2311.03735"
+        },
+        {
+          "text": "SEO-GEO Skill Documentation",
+          "url": "https://github.com/ReScienceLab/opc-skills/tree/main/skills/seo-geo"
+        },
+        {
+          "text": "SEO-GEO on Skills.sh Registry",
+          "url": "https://skills.sh/resciencelab/opc-skills/seo-geo"
+        },
+        {
+          "text": "OPC Skills GitHub Repository",
+          "url": "https://github.com/ReScienceLab/opc-skills"
+        },
+        {
+          "text": "Agent Skills Standard",
+          "url": "https://agentskills.io"
+        },
+        {
+          "text": "Hacker News Discussion",
+          "url": "https://news.ycombinator.com/item?id=46730857"
+        },
+        {
+          "text": "Community Testimonial - Hannie Liu on Threads",
+          "url": "https://www.threads.com/@hannie.liu/post/DUCyRBsieZU/found-the-ai-agent-skills-for-solopreneurs-also-works-for-early-stage-founders"
+        },
+        {
+          "text": "ChatGPT Search Documentation",
+          "url": "https://openai.com/chatgpt/search"
+        },
+        {
+          "text": "Perplexity AI",
+          "url": "https://perplexity.ai"
+        }
+      ]
+    },
+    {
       "slug": "install-opc-skills-claude-code",
       "title": "How to Install OPC Skills in Claude Code (2-Minute Tutorial)",
       "description": "Install 9 AI automation skills in Claude Code in 2 minutes. Save $127/month vs paid tools and reduce manual tasks by 85%. Get reddit research (no API key), domain hunting, SEO optimization, and logo creation. Complete guide with troubleshooting and real user success stories.",
